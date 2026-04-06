@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Fitness Admin App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* === MODERN FITNESS THEME VARIABLES === */
+        :root {
+            --bg-body: #1E1E24;
+            --bg-app: #0B0F19; /* Deep sleek dark */
+            --bg-card: #1A2235; /* Elevated card dark */
+            
+            /* Typography */
+            --text-main: #FFFFFF;
+            --text-muted: #8B95A5;
+            
+            /* Accents */
+            --primary: #00E676; /* High-energy neon green */
+            --primary-grad: linear-gradient(135deg, #00E676 0%, #00B259 100%);
+            --primary-glow: rgba(0, 230, 118, 0.25);
+            
+            --workout-accent: #00E5FF; /* Cyan for Training to differentiate from Diet */
+            --workout-grad: linear-gradient(135deg, #00E5FF 0%, #00B0FF 100%);
+            --workout-glow: rgba(0, 229, 255, 0.25);
+            
+            /* Utilities */
+            --border: #2A344A;
+            --danger: #FF4D4D;
+            --danger-bg: rgba(255, 77, 77, 0.15);
+            --card-radius: 24px;
+            
+            --app-width: 375px;
+            --app-height: 812px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+        }
+
+        /* === APP CONTAINER === */
+        #app-container {
+            width: var(--app-width);
+            height: var(--app-height);
+            background-color: var(--bg-app);
+            border-radius: 45px;
+            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.8), inset 0 0 0 10px #000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { display: none; }
+
+        /* === HEADER === */
+        header {
+            padding: 40px 24px 16px;
+            display: flex;
+            align-items: center;
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        #back-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-main);
+            cursor: pointer;
+            margin-right: 16px;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        #back-btn:active { transform: scale(0.9); background: var(--border); }
+
+        #header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            flex-grow: 1;
+        }
+
+        .inner-header #header-title { font-size: 1.25rem; font-weight: 600; }
+
+        /* Background Glow */
+        .glow-circle {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background: var(--primary);
+            filter: blur(100px);
+            opacity: 0.2;
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+            transition: background 0.5s ease;
+        }
+
+        /* === MAIN CONTENT === */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 20px 100px;
+            z-index: 10;
+        }
+
+        /* Screens & Transitions */
+        .screen { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .screen.active { display: block; opacity: 1; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === COMPONENTS === */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h2.section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 20px 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Grids & Stats */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        
+        .stat-card {
+            background: var(--bg-card);
+            padding: 24px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .stat-card h3 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+        .stat-card p { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
+
+        /* Lists */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .list-item:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
+        .list-item:last-child { margin-bottom: 0; }
+        
+        .item-info h4 { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+        .item-info p { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Badges */
+        .badge {
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge.active { background: rgba(0, 230, 118, 0.15); color: var(--primary); }
+        .badge.expired { background: var(--danger-bg); color: var(--danger); }
+        
+        /* Plan-specific Styling */
+        .plan-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .plan-badge.diet { background: rgba(0, 230, 118, 0.1); color: var(--primary); border: 1px solid rgba(0, 230, 118, 0.2); }
+        .plan-badge.workout { background: rgba(0, 229, 255, 0.1); color: var(--workout-accent); border: 1px solid rgba(0, 229, 255, 0.2); }
+        .plan-badge.none { background: var(--border); color: var(--text-muted); }
+
+        /* Buttons */
+        .btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .btn:active { transform: scale(0.96); }
+        
+        .btn-primary { background: var(--primary-grad); color: #000; box-shadow: 0 8px 20px var(--primary-glow); }
+        .btn-secondary { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); }
+        .btn-danger { background: var(--danger-bg); color: var(--danger); }
+        
+        .btn-diet { background: var(--primary-grad); color: #000; box-shadow: 0 8px 20px var(--primary-glow); }
+        .btn-workout { background: var(--workout-grad); color: #000; box-shadow: 0 8px 20px var(--workout-glow); }
+
+        .btn-sm { width: auto; padding: 10px 16px; font-size: 0.85rem; border-radius: 12px; margin-top: 0;}
+        .btn-group { display: flex; gap: 12px; margin-top: 16px; }
+
+        /* Forms */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+        .form-control {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 1rem;
+            background: #0B0F19;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+        .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+        .form-control::placeholder { color: #475569; }
+        select.form-control { cursor: pointer; }
+
+        /* Segmented Tabs */
+        .tabs { 
+            display: flex; 
+            background: #000; 
+            border-radius: 16px; 
+            padding: 4px; 
+            margin-bottom: 24px; 
+        }
+        .tab { 
+            flex: 1; 
+            text-align: center; 
+            padding: 12px; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            color: var(--text-muted); 
+            border-radius: 12px;
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab.active { background: var(--bg-card); color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        /* Plan Separators */
+        .plan-block { 
+            border-radius: 24px; 
+            padding: 20px; 
+            margin-bottom: 20px;
+            background: var(--bg-card);
+            border: 1px solid;
+            position: relative;
+            overflow: hidden;
+        }
+        .plan-block::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+        }
+        .plan-block.diet::before { background: var(--primary); }
+        .plan-block.diet { border-color: rgba(0, 230, 118, 0.1); }
+        .plan-block.workout::before { background: var(--workout-accent); }
+        .plan-block.workout { border-color: rgba(0, 229, 255, 0.1); }
+
+        /* Builder Styling */
+        .builder-item { 
+            background: rgba(255,255,255,0.02); 
+            border: 1px solid var(--border);
+            padding: 20px; 
+            border-radius: 20px; 
+            margin-bottom: 16px; 
+            position: relative;
+        }
+        .remove-item { 
+            position: absolute; top: -10px; right: -10px; 
+            background: var(--bg-card); color: var(--danger); 
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; cursor: pointer; 
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: 0.2s;
+        }
+        .remove-item:active { transform: scale(0.9); }
+
+        /* Profile Banner */
+        .profile-banner {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .avatar-lg {
+            width: 80px; height: 80px; 
+            background: var(--primary-grad); color: #000;
+            border-radius: 50%; margin: 0 auto 12px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 2rem; font-weight: 700;
+        }
+
+        /* === FLOATING BOTTOM NAV === */
+        nav {
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            right: 20px;
+            background: rgba(26, 34, 53, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-around;
+            padding: 16px 10px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            text-decoration: none;
+        }
+        .nav-item svg {
+            width: 24px; height: 24px;
+            margin-bottom: 6px;
+            stroke: currentColor;
+            fill: none;
+            transition: all 0.3s ease;
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active svg {
+            transform: translateY(-4px);
+            filter: drop-shadow(0 4px 6px var(--primary-glow));
+        }
+        .nav-item::after {
+            content: ''; position: absolute; bottom: -6px; width: 4px; height: 4px;
+            background: var(--primary); border-radius: 50%; opacity: 0; transition: all 0.3s ease;
+        }
+        .nav-item.active::after { opacity: 1; bottom: -2px; }
+
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div class="glow-circle" id="header-glow"></div>
+    
+    <header id="main-header">
+        <button id="back-btn" onclick="goBack()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div id="header-title">Overview</div>
+    </header>
+
+    <main>
+        <div id="screen-dashboard" class="screen active">
+            <div class="grid-2" style="margin-bottom: 24px;">
+                <div class="stat-card">
+                    <h3 style="color: var(--primary);">248</h3>
+                    <p>Total Athletes</p>
+                </div>
+                <div class="stat-card">
+                    <h3 style="color: var(--workout-accent);">195</h3>
+                    <p>Active Members</p>
+                </div>
+                <div class="stat-card">
+                    <h3>$4.2k</h3>
+                    <p>Revenue (MTD)</p>
+                </div>
+                <div class="stat-card">
+                    <h3 style="color: #FFB300;">8</h3>
+                    <p>Pro Trainers</p>
+                </div>
+            </div>
+
+            <h2 class="section-title">Recent Activity</h2>
+            <div class="card">
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>John Doe</h4>
+                        <p>Gym Check-in</p>
+                    </div>
+                    <span class="badge">10m ago</span>
+                </div>
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>Sarah Smith</h4>
+                        <p>Completed Workout</p>
+                    </div>
+                    <span class="badge">1h ago</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-customers" class="screen">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Search athletes...">
+            </div>
+            <div class="card">
+                <div class="list-item" onclick="navigate('screen-customer-detail', 'Athlete Profile', true)">
+                    <div class="item-info">
+                        <h4>Alex Johnson</h4>
+                        <p>Trainer: Mike T.</p>
+                    </div>
+                    <span class="badge active">Active</span>
+                </div>
+                <div class="list-item" onclick="navigate('screen-customer-detail', 'Athlete Profile', true)">
+                    <div class="item-info">
+                        <h4>Emma Davis</h4>
+                        <p>Trainer: Unassigned</p>
+                    </div>
+                    <span class="badge expired">Expired</span>
+                </div>
+            </div>
+            <button class="btn btn-primary">Add New Athlete</button>
+        </div>
+
+        <div id="screen-customer-detail" class="screen">
+            <div class="profile-banner">
+                <div class="avatar-lg">AJ</div>
+                <h2 style="font-size: 1.5rem; margin-bottom: 4px;">Alex Johnson</h2>
+                <span class="badge active" style="background: var(--bg-card);">Pro Member</span>
+            </div>
+
+            <h2 class="section-title">Nutrition & Training</h2>
+            
+            <div class="plan-block diet">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h4 style="font-size: 1.1rem;">Diet Plan</h4>
+                    <span class="plan-badge diet">Keto Cutting</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Ends April 30</p>
+                <div class="btn-group">
+                    <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="navigate('screen-assign-plan', 'Assign Plan', true)">Replace</button>
+                    <button class="btn btn-danger btn-sm">Drop</button>
+                </div>
+            </div>
+
+            <div class="plan-block workout">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h4 style="font-size: 1.1rem;">Workout Plan</h4>
+                    <span class="plan-badge none">No Program</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Athlete needs a training block.</p>
+                <button class="btn btn-workout btn-sm" style="width: 100%" onclick="navigate('screen-assign-plan', 'Assign Plan', true)">Assign Routine</button>
+            </div>
+        </div>
+
+        <div id="screen-plans" class="screen">
+            <div class="tabs">
+                <div class="tab active" onclick="togglePlanTab('diet')">Nutrition</div>
+                <div class="tab" onclick="togglePlanTab('workout')">Training</div>
+            </div>
+
+            <div id="tab-diet" class="plan-tab-content">
+                <div class="plan-block diet" style="padding: 16px;">
+                    <div class="list-item" style="border:none; padding: 0; background: transparent;">
+                        <div class="item-info">
+                            <h4>Standard Cutting</h4>
+                            <p>Assigned to 12 athletes</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm">Edit</button>
+                    </div>
+                </div>
+                <div class="plan-block diet" style="padding: 16px;">
+                    <div class="list-item" style="border:none; padding: 0; background: transparent;">
+                        <div class="item-info">
+                            <h4>Vegan Bulking</h4>
+                            <p>Assigned to 4 athletes</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm">Edit</button>
+                    </div>
+                </div>
+                <button class="btn btn-diet" onclick="navigate('screen-plan-builder', 'Build Plan', true)">Create Nutrition Plan</button>
+            </div>
+
+            <div id="tab-workout" class="plan-tab-content" style="display: none;">
+                <div class="plan-block workout" style="padding: 16px;">
+                    <div class="list-item" style="border:none; padding: 0; background: transparent;">
+                        <div class="item-info">
+                            <h4>Push Pull Legs (PPL)</h4>
+                            <p>Assigned to 28 athletes</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm">Edit</button>
+                    </div>
+                </div>
+                <div class="plan-block workout" style="padding: 16px;">
+                    <div class="list-item" style="border:none; padding: 0; background: transparent;">
+                        <div class="item-info">
+                            <h4>Beginner Full Body</h4>
+                            <p>Assigned to 15 athletes</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm">Edit</button>
+                    </div>
+                </div>
+                <button class="btn btn-workout" onclick="navigate('screen-plan-builder', 'Build Plan', true)">Create Training Plan</button>
+            </div>
+        </div>
+
+        <div id="screen-plan-builder" class="screen">
+            <div class="card">
+                <div class="form-group">
+                    <label>Program Name</label>
+                    <input type="text" class="form-control" placeholder="e.g. Summer Shred">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Program Type</label>
+                    <div class="tabs" style="margin-bottom:0;">
+                        <div class="tab active" id="type-diet-btn" onclick="setBuilderType('diet')">Nutrition</div>
+                        <div class="tab" id="type-workout-btn" onclick="setBuilderType('workout')">Training</div>
+                    </div>
+                    <input type="hidden" id="builder-type" value="diet">
+                </div>
+            </div>
+
+            <div class="tabs" style="background: transparent; padding:0; gap:8px;">
+                <div class="tab active" style="background: var(--bg-card);">Day 1</div>
+                <div class="tab" style="background: rgba(255,255,255,0.05);">Day 2</div>
+                <div class="tab" style="background: rgba(255,255,255,0.05);">+</div>
+            </div>
+
+            <div id="builder-diet-ui">
+                <div class="builder-item">
+                    <div class="remove-item">&times;</div>
+                    <div class="form-group">
+                        <label>Meal Name</label>
+                        <input type="text" class="form-control" placeholder="e.g. Breakfast">
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Calories</label>
+                            <input type="number" class="form-control" placeholder="400 kcal">
+                        </div>
+                        <div class="form-group">
+                            <label>Portion</label>
+                            <input type="text" class="form-control" placeholder="2 eggs, 1 toast">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Macros / Notes</label>
+                        <input type="text" class="form-control" placeholder="30g P / 10g C / 15g F">
+                    </div>
+                </div>
+                <button class="btn btn-secondary" style="margin-bottom: 24px; color: var(--primary); border: 1px dashed rgba(0, 230, 118, 0.4); background:transparent;">+ Add Meal</button>
+            </div>
+
+            <div id="builder-workout-ui" style="display: none;">
+                <div class="builder-item">
+                    <div class="remove-item">&times;</div>
+                    <div class="form-group">
+                        <label>Exercise</label>
+                        <input type="text" class="form-control" placeholder="e.g. Barbell Squat">
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select class="form-control">
+                                <option>Strength</option>
+                                <option>Cardio</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Sets x Reps</label>
+                            <input type="text" class="form-control" placeholder="3 x 10">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Rest Timer</label>
+                        <input type="text" class="form-control" placeholder="90 seconds">
+                    </div>
+                </div>
+                <button class="btn btn-secondary" style="margin-bottom: 24px; color: var(--workout-accent); border: 1px dashed rgba(0, 229, 255, 0.4); background:transparent;">+ Add Exercise</button>
+            </div>
+
+            <button class="btn btn-diet" id="save-plan-btn" onclick="goBack()">Save Program</button>
+        </div>
+
+        <div id="screen-assign-plan" class="screen">
+            <div class="card">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Assigning to</label>
+                    <div style="font-size: 1.2rem; font-weight: 700;">Alex Johnson</div>
+                </div>
+            </div>
+
+            <div class="plan-block diet">
+                <h2 class="section-title" style="margin-top:0; color: var(--primary);">Nutrition Plan</h2>
+                <div class="form-group">
+                    <select class="form-control">
+                        <option>No Nutrition Plan</option>
+                        <option selected>Keto Cutting (Template)</option>
+                        <option>Standard Bulking (Template)</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary btn-sm" style="width: 100%" onclick="navigate('screen-plan-builder', 'Custom Diet', true)">Build Custom Override</button>
+            </div>
+
+            <div class="plan-block workout">
+                <h2 class="section-title" style="margin-top:0; color: var(--workout-accent);">Training Plan</h2>
+                <div class="form-group">
+                    <select class="form-control">
+                        <option selected>No Training Plan</option>
+                        <option>PPL (Template)</option>
+                        <option>Beginner Full Body (Template)</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary btn-sm" style="width: 100%" onclick="navigate('screen-plan-builder', 'Custom Workout', true)">Build Custom Override</button>
+            </div>
+
+            <button class="btn btn-primary" onclick="goBack()">Confirm Assignment</button>
+        </div>
+
+        <div id="screen-trainers" class="screen">
+            <div class="card">
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>Mike Thompson</h4>
+                        <p>12 Active Athletes</p>
+                    </div>
+                    <button class="btn btn-secondary btn-sm">Manage</button>
+                </div>
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>Jessica Alba</h4>
+                        <p>8 Active Athletes</p>
+                    </div>
+                    <button class="btn btn-secondary btn-sm">Manage</button>
+                </div>
+            </div>
+            <button class="btn btn-primary">Add Pro Trainer</button>
+        </div>
+
+        <div id="screen-payments" class="screen">
+            <div class="card">
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>Alex Johnson</h4>
+                        <p>Pro Member • Apr 1</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h4 style="color: var(--text-main);">$50.00</h4>
+                        <span style="color: var(--primary); font-size: 0.75rem; font-weight:700;">Paid</span>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>Emma Davis</h4>
+                        <p>Pro Member • Mar 28</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h4 style="color: var(--text-main);">$50.00</h4>
+                        <span style="color: var(--danger); font-size: 0.75rem; font-weight:700;">Declined</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary">Record Payment</button>
+        </div>
+
+    </main>
+
+    <nav id="bottom-nav">
+        <a class="nav-item active" data-target="screen-dashboard" onclick="navigate('screen-dashboard', 'Overview')">
+            <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            Home
+        </a>
+        <a class="nav-item" data-target="screen-customers" onclick="navigate('screen-customers', 'Athletes')">
+            <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Clients
+        </a>
+        <a class="nav-item" data-target="screen-plans" onclick="navigate('screen-plans', 'Programs')">
+            <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Plans
+        </a>
+        <a class="nav-item" data-target="screen-trainers" onclick="navigate('screen-trainers', 'Staff')">
+            <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Staff
+        </a>
+        <a class="nav-item" data-target="screen-payments" onclick="navigate('screen-payments', 'Billing')">
+            <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+            Billing
+        </a>
+    </nav>
+</div>
+
+<script>
+    let historyStack = ['screen-dashboard'];
+
+    // Update accent glow based on section to match modern vibrant aesthetic
+    function updateGlow(screenId) {
+        const glow = document.getElementById('header-glow');
+        if(screenId === 'screen-plans' || screenId === 'screen-plan-builder') {
+            const isWorkout = document.getElementById('tab-workout').style.display === 'block' || document.getElementById('builder-type').value === 'workout';
+            glow.style.background = isWorkout ? 'var(--workout-accent)' : 'var(--primary)';
+        } else {
+            glow.style.background = 'var(--primary)';
+        }
+        
+        // Match nav icon active color to glow logic dynamically
+        document.documentElement.style.setProperty('--primary', glow.style.background);
+    }
+
+    function navigate(screenId, title, isInnerPage = false) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        document.getElementById('header-title').innerText = title;
+        
+        const header = document.getElementById('main-header');
+        const backBtn = document.getElementById('back-btn');
+        const bottomNav = document.getElementById('bottom-nav');
+        
+        if (isInnerPage) {
+            header.classList.add('inner-header');
+            backBtn.style.display = 'flex';
+            bottomNav.style.transform = 'translateY(150%)'; // Hide nav cleanly
+            if (historyStack[historyStack.length - 1] !== screenId) {
+                historyStack.push(screenId);
+            }
+        } else {
+            header.classList.remove('inner-header');
+            backBtn.style.display = 'none';
+            bottomNav.style.transform = 'translateY(0)'; // Show nav
+            historyStack = [screenId]; 
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const activeNav = document.querySelector(`.nav-item[data-target="${screenId}"]`);
+            if (activeNav) activeNav.classList.add('active');
+        }
+        
+        // Reset primary color to default green unless overridden by updateGlow
+        document.documentElement.style.setProperty('--primary', '#00E676');
+        updateGlow(screenId);
+    }
+
+    function goBack() {
+        if (historyStack.length > 1) {
+            historyStack.pop(); 
+            const prevScreen = historyStack[historyStack.length - 1];
+            
+            let title = "App";
+            if(prevScreen === 'screen-dashboard') title = "Overview";
+            if(prevScreen === 'screen-customers') title = "Athletes";
+            if(prevScreen === 'screen-plans') title = "Programs";
+            if(prevScreen === 'screen-customer-detail') title = "Athlete Profile";
+            
+            navigate(prevScreen, title, historyStack.length > 1);
+        }
+    }
+
+    function togglePlanTab(type) {
+        const tabs = document.querySelectorAll('#screen-plans .tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        
+        document.getElementById('tab-diet').style.display = 'none';
+        document.getElementById('tab-workout').style.display = 'none';
+
+        if(type === 'diet') {
+            tabs[0].classList.add('active');
+            document.getElementById('tab-diet').style.display = 'block';
+            tabs[0].style.color = "var(--primary)";
+            tabs[1].style.color = "var(--text-muted)";
+        } else {
+            tabs[1].classList.add('active');
+            document.getElementById('tab-workout').style.display = 'block';
+            tabs[1].style.color = "var(--workout-accent)";
+            tabs[0].style.color = "var(--text-muted)";
+        }
+        updateGlow('screen-plans');
+    }
+
+    function setBuilderType(type) {
+        document.getElementById('builder-type').value = type;
+        const btnDiet = document.getElementById('type-diet-btn');
+        const btnWorkout = document.getElementById('type-workout-btn');
+        const saveBtn = document.getElementById('save-plan-btn');
+
+        if(type === 'diet') {
+            btnDiet.classList.add('active');
+            btnDiet.style.color = "var(--primary)";
+            btnWorkout.classList.remove('active');
+            btnWorkout.style.color = "var(--text-muted)";
+            
+            document.getElementById('builder-diet-ui').style.display = 'block';
+            document.getElementById('builder-workout-ui').style.display = 'none';
+            saveBtn.className = 'btn btn-diet';
+        } else {
+            btnWorkout.classList.add('active');
+            btnWorkout.style.color = "var(--workout-accent)";
+            btnDiet.classList.remove('active');
+            btnDiet.style.color = "var(--text-muted)";
+            
+            document.getElementById('builder-diet-ui').style.display = 'none';
+            document.getElementById('builder-workout-ui').style.display = 'block';
+            saveBtn.className = 'btn btn-workout';
+        }
+        updateGlow('screen-plan-builder');
+    }
+</script>
+
+</body>
+</html>

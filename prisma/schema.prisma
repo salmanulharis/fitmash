@@ -1,0 +1,285 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TenantStatus {
+  active
+  blocked
+  suspended
+}
+
+model Tenants {
+  id             String        @id @default(uuid()) @db.Uuid
+  name           String
+  ownerId        String        @db.Uuid
+  status         TenantStatus  @default(active)
+  blockedReason  String?
+  blockedAt      DateTime?
+  createdAt      DateTime      @default(now())
+
+  users               User[]
+  subscriptions       TenantSubscription[]
+  gyms                Gym[]
+  membershipPlans     MembershipPlan[]
+  customerSubscriptions CustomerSubscription[]
+  plans               Plan[]
+  planItems           PlanItem[]
+  userPlans           UserPlan[]
+  planProgress        PlanProgress[]
+  planProgressItems   PlanProgressItem[]
+  trainerUsers        TrainerUser[]
+}
+
+enum UserRole {
+  admin
+  trainer
+  customer
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @db.Uuid
+  name      String
+  email     String
+  phone     String
+  role      UserRole @default(customer)
+  createdAt DateTime @default(now())
+
+  tenant               Tenants              @relation(fields: [tenantId], references: [id])
+  customerSubscriptions CustomerSubscription[]
+  plans                Plan[]
+  assignedPlans        UserPlan[]           @relation("AssignedBy")
+  userPlans            UserPlan[]
+  trainerUsers         TrainerUser[]        @relation("TrainerUsers")
+  userTrainers         TrainerUser[]        @relation("UserTrainers")
+
+  @@map("users")
+}
+
+enum PlanType {
+  diet
+  workout
+}
+
+model Plan {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @db.Uuid
+  name      String
+  type      PlanType
+  createdBy String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  tenant    Tenants  @relation(fields: [tenantId], references: [id])
+  creator   User     @relation(fields: [createdBy], references: [id])
+  items     PlanItem[]
+  userPlans UserPlan[]
+
+  @@map("plans")
+}
+
+enum PlanItemType {
+  meal
+  exercise
+}
+
+model PlanItem {
+  id        String       @id @default(uuid()) @db.Uuid
+  tenantId  String       @db.Uuid
+  planId    String       @db.Uuid
+  day       Int
+  title     String
+  description String
+  type      PlanItemType
+  meta      Json
+
+  tenant        Tenants            @relation(fields: [tenantId], references: [id])
+  plan          Plan               @relation(fields: [planId], references: [id])
+  progressItems PlanProgressItem[]
+
+  @@map("plan_items")
+}
+
+enum UserPlanStatus {
+  active
+  completed
+  cancelled
+}
+
+model UserPlan {
+  id          String         @id @default(uuid()) @db.Uuid
+  tenantId    String         @db.Uuid
+  userId      String         @db.Uuid
+  planId      String         @db.Uuid
+  startDate   DateTime       @db.Date
+  endDate     DateTime       @db.Date
+  assignedBy  String         @db.Uuid
+  status      UserPlanStatus @default(active)
+
+  tenant      Tenants        @relation(fields: [tenantId], references: [id])
+  user        User           @relation(fields: [userId], references: [id])
+  plan        Plan           @relation(fields: [planId], references: [id])
+  assigner    User           @relation("AssignedBy", fields: [assignedBy], references: [id])
+  progress    PlanProgress[]
+
+  @@map("user_plans")
+}
+
+model PlanProgress {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  userPlanId  String   @db.Uuid
+  date        DateTime @db.Date
+
+  tenant      Tenants  @relation(fields: [tenantId], references: [id])
+  userPlan    UserPlan @relation(fields: [userPlanId], references: [id])
+  items       PlanProgressItem[]
+
+  @@map("plan_progress")
+}
+
+model PlanProgressItem {
+  id            String       @id @default(uuid()) @db.Uuid
+  tenantId      String       @db.Uuid
+  progressId    String       @db.Uuid
+  planItemId    String       @db.Uuid
+  status        Boolean      @default(false)
+  notes         String?
+
+  tenant        Tenants      @relation(fields: [tenantId], references: [id])
+  progress      PlanProgress @relation(fields: [progressId], references: [id])
+  planItem      PlanItem     @relation(fields: [planItemId], references: [id])
+
+  @@map("plan_progress_items")
+}
+
+model TrainerUser {
+  id        String @id @default(uuid()) @db.Uuid
+  tenantId  String @db.Uuid
+  trainerId String @db.Uuid
+  userId    String @db.Uuid
+
+  tenant    Tenants @relation(fields: [tenantId], references: [id])
+  trainer   User    @relation("TrainerUsers", fields: [trainerId], references: [id])
+  user      User    @relation("UserTrainers", fields: [userId], references: [id])
+
+  @@map("trainer_users")
+}
+
+model SaasPlan {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  price         Decimal  @db.Decimal(10, 2)
+  durationDays  Int
+  features      Json
+
+  subscriptions TenantSubscription[]
+
+  @@map("saas_plans")
+}
+
+model MembershipPlan {
+  id                    String               @id @default(uuid()) @db.Uuid
+  tenantId              String               @db.Uuid
+  name                  String
+  price                 Decimal              @db.Decimal(10, 2)
+  durationDays          Int
+  features              Json
+  createdAt             DateTime             @default(now())
+
+  tenant                Tenants              @relation(fields: [tenantId], references: [id])
+  customerSubscriptions CustomerSubscription[]
+
+  @@map("membership_plans")
+}
+
+model Gym {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @db.Uuid
+  name          String
+  address       String
+  contactNumber String
+
+  tenant        Tenants  @relation(fields: [tenantId], references: [id])
+
+  @@map("gyms")
+}
+
+enum SubscriptionStatus {
+  active
+  expired
+  cancelled
+}
+
+model TenantSubscription {
+  id        String             @id @default(uuid()) @db.Uuid
+  tenantId  String             @db.Uuid
+  planId    String             @db.Uuid
+  startDate DateTime           @db.Date
+  endDate   DateTime           @db.Date
+  status    SubscriptionStatus @default(active)
+
+  tenant    Tenants            @relation(fields: [tenantId], references: [id])
+  plan      SaasPlan           @relation(fields: [planId], references: [id])
+  payments  TenantPayment[]
+
+  @@map("tenant_subscriptions")
+}
+
+model CustomerSubscription {
+  id        String             @id @default(uuid()) @db.Uuid
+  tenantId  String             @db.Uuid
+  userId    String             @db.Uuid
+  planId    String             @db.Uuid
+  startDate DateTime           @db.Date
+  endDate   DateTime           @db.Date
+  status    SubscriptionStatus @default(active)
+
+  tenant    Tenants            @relation(fields: [tenantId], references: [id])
+  user      User               @relation(fields: [userId], references: [id])
+  plan      MembershipPlan     @relation(fields: [planId], references: [id])
+  payments  CustomerPayment[]
+
+  @@map("customer_subscriptions")
+}
+
+enum CustomerPaymentStatus {
+  paid
+  pending
+  failed
+}
+
+model CustomerPayment {
+  id                     String                @id @default(uuid()) @db.Uuid
+  tenantId               String                @db.Uuid
+  customerSubscriptionId String                @db.Uuid
+  amount                 Decimal               @db.Decimal(10, 2)
+  paymentMethod          String
+  status                 CustomerPaymentStatus @default(pending)
+  paidAt                 DateTime?
+
+  tenant                 Tenants               @relation(fields: [tenantId], references: [id])
+  customerSubscription   CustomerSubscription  @relation(fields: [customerSubscriptionId], references: [id])
+
+  @@map("customer_payments")
+}
+
+enum PaymentStatus {
+  paid
+  failed
+}
+
+model TenantPayment {
+  id                    String            @id @default(uuid()) @db.Uuid
+  tenantSubscriptionId  String            @db.Uuid
+  amount                Decimal           @db.Decimal(10, 2)
+  status                PaymentStatus     @default(failed)
+  paidAt                DateTime?
+
+  tenantSubscription    TenantSubscription @relation(fields: [tenantSubscriptionId], references: [id])
+
+  @@map("tenant_payments")
+}

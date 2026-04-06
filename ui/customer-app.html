@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Fitness App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* === MODERN FITNESS THEME VARIABLES === */
+        :root {
+            --bg-body: #1E1E24;
+            --bg-app: #0B0F19; /* Deep sleek dark */
+            --bg-card: #1A2235; /* Elevated card dark */
+            --bg-card-hover: #222B40;
+            --primary: #00E676; /* High-energy neon green */
+            --primary-gradient: linear-gradient(135deg, #00E676 0%, #00B259 100%);
+            --primary-glow: rgba(0, 230, 118, 0.25);
+            --text-main: #FFFFFF;
+            --text-muted: #8B95A5;
+            --border: #2A344A;
+            --danger: #FF4D4D;
+            --card-radius: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif; /* Modern sans-serif */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+        }
+
+        /* === APP DEVICE CONTAINER === */
+        .app-container {
+            width: 375px;
+            height: 812px;
+            background-color: var(--bg-app);
+            border-radius: 45px;
+            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.8), inset 0 0 0 10px #000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* === HEADER === */
+        .header {
+            padding: 40px 24px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(11, 15, 25, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #000;
+        }
+
+        /* === CONTENT AREA === */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 100px;
+        }
+        .content::-webkit-scrollbar { display: none; }
+
+        .screen, .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .screen.active, .tab-content.active { display: block; opacity: 1; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MODERN CARDS === */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .row-between { display: flex; justify-content: space-between; align-items: center; }
+
+        /* === DASHBOARD PROGRESS RING === */
+        .progress-ring-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .progress-ring {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 75%, var(--border) 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+        
+        .progress-ring-inner {
+            width: 115px;
+            height: 115px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* === SEGMENTED TABS === */
+        .tabs {
+            display: flex;
+            background: #000;
+            border-radius: 16px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab.active {
+            background: var(--bg-card);
+            color: var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* === TASK LISTS === */
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .list-item:active { transform: scale(0.98); }
+        
+        /* Modern Circular Checkbox */
+        .task-checkbox {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+        .task-checkbox.checked {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .task-checkbox.checked::after {
+            content: '';
+            width: 6px;
+            height: 12px;
+            border: solid #000;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg) translateY(-1px);
+        }
+
+        .task-info { flex: 1; }
+        .task-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+        .task-name.completed {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+        .task-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Modern Badges */
+        .badge {
+            background: var(--border);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .badge.highlight {
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--primary);
+        }
+
+        /* === BUTTONS === */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: #000;
+            box-shadow: 0 8px 20px var(--primary-glow);
+        }
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+        .btn:active { transform: scale(0.96); }
+
+        /* === BOTTOM NAVIGATION === */
+        .bottom-nav {
+            position: absolute;
+            bottom: 10px; /* Floating above bezel */
+            left: 20px;
+            right: 20px;
+            background: rgba(26, 34, 53, 0.85);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-around;
+            padding: 16px 10px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 6px;
+            stroke: currentColor;
+            transition: all 0.3s ease;
+        }
+        .nav-item.active {
+            color: var(--primary);
+        }
+        .nav-item.active svg {
+            transform: translateY(-4px);
+            filter: drop-shadow(0 4px 6px var(--primary-glow));
+        }
+        
+        /* Add a small active dot */
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .nav-item.active::after {
+            opacity: 1;
+            bottom: -2px;
+        }
+
+        /* Profile Special */
+        .profile-banner {
+            background: linear-gradient(135deg, rgba(0,230,118,0.2) 0%, rgba(0,0,0,0) 100%);
+            margin: -20px -20px 20px;
+            padding: 40px 20px 20px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <header class="header">
+        <div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2px;">Welcome back,</div>
+            <h1 id="header-title">John Doe</h1>
+        </div>
+        <div class="header-avatar">JD</div>
+    </header>
+
+    <main class="content">
+
+        <div id="screen-dashboard" class="screen active">
+            
+            <div class="card" style="margin-top: 10px;">
+                <div class="card-title">
+                    <span>Daily Goal</span>
+                    <span style="color: var(--primary); font-size: 0.9rem;">🔥 5 Day Streak</span>
+                </div>
+                
+                <div class="progress-ring-container">
+                    <div class="progress-ring">
+                        <div class="progress-ring-inner">
+                            <span style="font-size: 2.2rem; font-weight: 700;">75%</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.1rem; margin: 24px 0 16px; font-weight: 600;">Quick Actions</h3>
+            
+            <div class="row-between" style="gap: 16px;">
+                <div class="card" style="flex: 1; margin: 0; cursor: pointer; text-align: center; padding: 24px 16px;" onclick="navToTasks('diet')">
+                    <div style="font-size: 2rem; margin-bottom: 12px; filter: grayscale(20%);">🥗</div>
+                    <div style="font-weight: 600; font-size: 1rem; margin-bottom: 4px;">Diet Tasks</div>
+                    <div style="font-size: 0.8rem; color: var(--primary);">2 of 4 left</div>
+                </div>
+                <div class="card" style="flex: 1; margin: 0; cursor: pointer; text-align: center; padding: 24px 16px;" onclick="navToTasks('workout')">
+                    <div style="font-size: 2rem; margin-bottom: 12px; filter: grayscale(20%);">🏋️</div>
+                    <div style="font-weight: 600; font-size: 1rem; margin-bottom: 4px;">Workout</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">1 of 5 left</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-plan" class="screen">
+            <div class="tabs">
+                <div class="tab active" data-group="plan" onclick="switchTab('plan', 'plan-workout', this)">Workout</div>
+                <div class="tab" data-group="plan" onclick="switchTab('plan', 'plan-diet', this)">Nutrition</div>
+            </div>
+
+            <div id="plan-workout" class="tab-content active" data-group="plan">
+                <div class="card">
+                    <div class="card-title">
+                        <span>Day 1: Upper Body Power</span>
+                        <span class="badge highlight">Strength</span>
+                    </div>
+                    
+                    <div class="list-item" style="padding: 12px; background: transparent;">
+                        <div class="task-info">
+                            <div class="task-name">Barbell Bench Press</div>
+                            <div class="task-meta"><span class="badge">4 Sets</span><span class="badge">8-10 Reps</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item" style="padding: 12px; background: transparent;">
+                        <div class="task-info">
+                            <div class="task-name">Incline Dumbbell Press</div>
+                            <div class="task-meta"><span class="badge">3 Sets</span><span class="badge">10-12 Reps</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item" style="padding: 12px; background: transparent;">
+                        <div class="task-info">
+                            <div class="task-name">Lat Pulldowns</div>
+                            <div class="task-meta"><span class="badge">4 Sets</span><span class="badge">12 Reps</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="plan-diet" class="tab-content" data-group="plan">
+                <div class="card">
+                    <div class="card-title">
+                        <span>High Protein Phase</span>
+                        <span class="badge highlight">2400 kcal</span>
+                    </div>
+                    
+                    <div class="list-item" style="padding: 12px; background: transparent;">
+                        <div class="task-info">
+                            <div class="task-name">Breakfast: Oats & Whey</div>
+                            <div class="task-meta">
+                                <span class="badge">450 cal</span>
+                                <span class="badge" style="color: var(--primary);">40g P</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-item" style="padding: 12px; background: transparent;">
+                        <div class="task-info">
+                            <div class="task-name">Lunch: Chicken & Rice</div>
+                            <div class="task-meta">
+                                <span class="badge">600 cal</span>
+                                <span class="badge" style="color: var(--primary);">55g P</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-tasks" class="screen">
+            <div class="tabs">
+                <div class="tab active" data-group="tasks" id="tab-btn-task-workout" onclick="switchTab('tasks', 'task-workout', this)">Exercises</div>
+                <div class="tab" data-group="tasks" id="tab-btn-task-diet" onclick="switchTab('tasks', 'task-diet', this)">Meals</div>
+            </div>
+
+            <div id="task-workout" class="tab-content active" data-group="tasks">
+                
+                <div class="list-item">
+                    <div class="task-checkbox checked" onclick="toggleTask(this)"></div>
+                    <div class="task-info">
+                        <div class="task-name completed">Treadmill Warmup</div>
+                        <div class="task-meta">Cardio • 10 mins</div>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-info">
+                        <div class="task-name">Barbell Bench Press</div>
+                        <div class="task-meta">Strength • 4 x 8-10</div>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-info">
+                        <div class="task-name">Lat Pulldowns</div>
+                        <div class="task-meta">Strength • 4 x 12</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="margin-top: 24px;" onclick="markAllComplete('task-workout')">Complete Workout</button>
+            </div>
+
+            <div id="task-diet" class="tab-content" data-group="tasks">
+                
+                <div class="list-item">
+                    <div class="task-checkbox checked" onclick="toggleTask(this)"></div>
+                    <div class="task-info">
+                        <div class="task-name completed">Oatmeal & Eggs</div>
+                        <div class="task-meta">Breakfast • 450 kcal</div>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div class="task-checkbox" onclick="toggleTask(this)"></div>
+                    <div class="task-info">
+                        <div class="task-name">Chicken Breast & Rice</div>
+                        <div class="task-meta">Lunch • 600 kcal</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="margin-top: 24px;" onclick="markAllComplete('task-diet')">Log All Meals</button>
+            </div>
+        </div>
+
+        <div id="screen-progress" class="screen">
+            <div class="card">
+                <div class="card-title">Activity This Week</div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; height: 160px; padding-top: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 16px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; height: 100%;">
+                        <div style="width: 12px; background: var(--primary-gradient); height: 100%; border-radius: 20px; box-shadow: 0 0 10px var(--primary-glow);"></div>
+                        <span style="font-size: 0.75rem; color: var(--text-main); font-weight: 600;">M</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; height: 100%;">
+                        <div style="width: 12px; background: var(--primary-gradient); height: 80%; border-radius: 20px; box-shadow: 0 0 10px var(--primary-glow);"></div>
+                        <span style="font-size: 0.75rem; color: var(--text-main); font-weight: 600;">T</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; height: 100%;">
+                        <div style="width: 12px; background: var(--primary-gradient); height: 40%; border-radius: 20px;"></div>
+                        <span style="font-size: 0.75rem; color: var(--text-main); font-weight: 600;">W</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; height: 100%;">
+                        <div style="width: 12px; background: var(--border); height: 10%; border-radius: 20px;"></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">T</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; height: 100%;">
+                        <div style="width: 12px; background: var(--border); height: 10%; border-radius: 20px;"></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">F</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; height: 100%;">
+                        <div style="width: 12px; background: var(--border); height: 10%; border-radius: 20px;"></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">S</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; height: 100%;">
+                        <div style="width: 12px; background: var(--border); height: 10%; border-radius: 20px;"></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">S</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row-between" style="gap: 16px;">
+                <div class="card" style="flex: 1;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Total Volume</div>
+                    <div style="font-size: 1.5rem; font-weight: 700;">12.4k <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-muted);">lbs</span></div>
+                </div>
+                <div class="card" style="flex: 1;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Avg Completion</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">88%</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-profile" class="screen">
+            <div class="profile-banner">
+                <div class="header-avatar" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto 16px;">JD</div>
+                <h2 style="font-size: 1.5rem;">John Doe</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Pro Member</p>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, #2A344A 0%, #1A2235 100%);">
+                <div class="row-between" style="margin-bottom: 16px;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">Current Plan</div>
+                        <div style="font-size: 1.2rem; font-weight: 700;">Hypertrophy Elite</div>
+                    </div>
+                    <span class="badge highlight">Active</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Renews Dec 31, 2026</div>
+            </div>
+
+            <div class="card">
+                <div class="list-item" style="padding: 12px 0;">
+                    <div class="task-info"><div class="task-name" style="margin: 0;">Settings</div></div>
+                    <div style="color: var(--text-muted);">›</div>
+                </div>
+                <div class="list-item" style="padding: 12px 0;">
+                    <div class="task-info"><div class="task-name" style="margin: 0;">Gym Access QR</div></div>
+                    <div style="color: var(--text-muted);">›</div>
+                </div>
+                <div class="list-item" style="padding: 12px 0; border: none;">
+                    <div class="task-info"><div class="task-name" style="margin: 0; color: var(--danger);">Log Out</div></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" id="nav-dashboard" onclick="switchScreen('dashboard', 'Dashboard')">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            Home
+        </div>
+        <div class="nav-item" id="nav-plan" onclick="switchScreen('plan', 'My Plan')">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Plan
+        </div>
+        <div class="nav-item" id="nav-tasks" onclick="switchScreen('tasks', 'Execution')">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M9 12l2 2 4-4"></path></svg>
+            Tasks
+        </div>
+        <div class="nav-item" id="nav-progress" onclick="switchScreen('progress', 'Metrics')">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Metrics
+        </div>
+        <div class="nav-item" id="nav-profile" onclick="switchScreen('profile', 'Profile')">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Profile
+        </div>
+    </nav>
+</div>
+
+<script>
+    function switchScreen(screenId, title) {
+        // Handle Header
+        const header = document.querySelector('.header');
+        const headerTitle = document.getElementById('header-title');
+        
+        if (screenId === 'profile' || screenId === 'dashboard') {
+            header.style.display = 'flex';
+            headerTitle.innerText = screenId === 'dashboard' ? 'John Doe' : title;
+        } else {
+            header.style.display = 'flex';
+            headerTitle.innerText = title;
+        }
+
+        // Handle Screens
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        document.getElementById('screen-' + screenId).classList.add('active');
+        
+        // Handle Nav
+        document.querySelectorAll('.nav-item').forEach(nav => {
+            nav.classList.remove('active');
+        });
+        document.getElementById('nav-' + screenId).classList.add('active');
+    }
+
+    function switchTab(groupName, targetTabId, clickedTabElement) {
+        document.querySelectorAll(`.tab[data-group="${groupName}"]`).forEach(tab => {
+            tab.classList.remove('active');
+        });
+        clickedTabElement.classList.add('active');
+
+        document.querySelectorAll(`.tab-content[data-group="${groupName}"]`).forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(targetTabId).classList.add('active');
+    }
+
+    function toggleTask(element) {
+        element.classList.toggle('checked');
+        const taskName = element.nextElementSibling.querySelector('.task-name');
+        if (taskName) {
+            taskName.classList.toggle('completed');
+        }
+    }
+
+    function markAllComplete(containerId) {
+        const container = document.getElementById(containerId);
+        const checkboxes = container.querySelectorAll('.task-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            if (!checkbox.classList.contains('checked')) {
+                toggleTask(checkbox);
+            }
+        });
+    }
+
+    function navToTasks(type) {
+        switchScreen('tasks', 'Execution');
+        const tabBtn = document.getElementById(`tab-btn-task-${type}`);
+        switchTab('tasks', `task-${type}`, tabBtn);
+    }
+</script>
+
+</body>
+</html>

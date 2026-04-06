@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymManage SaaS - Super Admin</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#2563EB', primaryDark: '#1D4ED8' }
+                }
+            }
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Custom Scrollbar for a cleaner SaaS look */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Skeleton Loader Animation */
+        .skeleton { background: #e2e8f0; border-radius: 4px; animation: pulse 1.5s infinite ease-in-out; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body class="flex h-screen bg-gray-50 text-gray-800 font-sans overflow-hidden">
+
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-20">
+        <div class="h-16 flex items-center px-6 border-b border-gray-200">
+            <div class="flex items-center gap-2 text-primary font-bold text-xl">
+                <i class="ph-fill ph-barbell text-2xl"></i>
+                <span>FitSaaS</span>
+            </div>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <a href="#" onclick="nav('dashboard')" class="nav-link active flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-blue-50 text-primary transition-colors" data-target="dashboard">
+                <i class="ph ph-squares-four text-lg"></i> Dashboard
+            </a>
+            <a href="#" onclick="nav('tenants')" class="nav-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors" data-target="tenants">
+                <i class="ph ph-buildings text-lg"></i> Tenants (Gyms)
+            </a>
+            <a href="#" onclick="nav('plans')" class="nav-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors" data-target="plans">
+                <i class="ph ph-tag text-lg"></i> SaaS Plans
+            </a>
+            <a href="#" onclick="nav('subscriptions')" class="nav-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors" data-target="subscriptions">
+                <i class="ph ph-arrows-clockwise text-lg"></i> Subscriptions
+            </a>
+            <a href="#" onclick="nav('payments')" class="nav-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors" data-target="payments">
+                <i class="ph ph-credit-card text-lg"></i> Payments
+            </a>
+            <a href="#" onclick="nav('analytics')" class="nav-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors" data-target="analytics">
+                <i class="ph ph-chart-line-up text-lg"></i> Analytics
+            </a>
+            <a href="#" onclick="nav('settings')" class="nav-link flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors" data-target="settings">
+                <i class="ph ph-gear text-lg"></i> Settings
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex items-center gap-3">
+                <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" class="w-8 h-8 rounded-full">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">Super Admin</p>
+                    <p class="text-xs text-gray-500 truncate">admin@fitsaas.com</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10">
+            <div class="flex items-center w-96 relative">
+                <i class="ph ph-magnifying-glass absolute left-3 text-gray-400 text-lg"></i>
+                <input type="text" placeholder="Search gyms, users, or payments (Press '/')" class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-transparent rounded-md focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all shadow-sm placeholder-gray-400">
+            </div>
+            
+            <div class="flex items-center gap-5">
+                <button class="text-gray-500 hover:text-gray-900 relative">
+                    <i class="ph ph-bell text-xl"></i>
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                </button>
+                <div class="h-6 w-px bg-gray-300"></div>
+                <button class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900">
+                    Help & Docs <i class="ph ph-question text-lg text-gray-400"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8 relative">
+
+            <div id="view-dashboard" class="view-section active">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-semibold text-gray-900">Overview</h1>
+                    <div class="flex gap-2 text-sm">
+                        <select class="border border-gray-300 rounded-md px-3 py-1.5 shadow-sm outline-none focus:border-primary">
+                            <option>Last 30 Days</option>
+                            <option>This Month</option>
+                            <option>Last Quarter</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Total Gyms</p>
+                                <h3 class="text-3xl font-semibold text-gray-900 mt-1">1,482</h3>
+                            </div>
+                            <div class="p-2 bg-blue-50 rounded-lg"><i class="ph ph-buildings text-primary text-xl"></i></div>
+                        </div>
+                        <p class="text-xs text-green-600 font-medium mt-4 flex items-center gap-1"><i class="ph ph-trend-up"></i> +12% from last month</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Active Subscriptions</p>
+                                <h3 class="text-3xl font-semibold text-gray-900 mt-1">1,390</h3>
+                            </div>
+                            <div class="p-2 bg-green-50 rounded-lg"><i class="ph ph-check-circle text-green-600 text-xl"></i></div>
+                        </div>
+                        <p class="text-xs text-green-600 font-medium mt-4 flex items-center gap-1"><i class="ph ph-trend-up"></i> +8% from last month</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Monthly Revenue (MRR)</p>
+                                <h3 class="text-3xl font-semibold text-gray-900 mt-1">$142k</h3>
+                            </div>
+                            <div class="p-2 bg-purple-50 rounded-lg"><i class="ph ph-currency-dollar text-purple-600 text-xl"></i></div>
+                        </div>
+                        <p class="text-xs text-green-600 font-medium mt-4 flex items-center gap-1"><i class="ph ph-trend-up"></i> +15% from last month</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Failed Payments</p>
+                                <h3 class="text-3xl font-semibold text-gray-900 mt-1">24</h3>
+                            </div>
+                            <div class="p-2 bg-red-50 rounded-lg"><i class="ph ph-warning-circle text-red-600 text-xl"></i></div>
+                        </div>
+                        <p class="text-xs text-red-600 font-medium mt-4 flex items-center gap-1"><i class="ph ph-trend-down"></i> -2% from last month</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                        <h3 class="text-base font-semibold text-gray-900 mb-4">Revenue Over Time</h3>
+                        <div class="h-64"><canvas id="revenueChart"></canvas></div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                        <h3 class="text-base font-semibold text-gray-900 mb-4">Subscription Plan Distribution</h3>
+                        <div class="h-64 flex justify-center"><canvas id="subChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-base font-semibold text-gray-900">Recent Onboarded Gyms</h3>
+                        <button onclick="nav('tenants')" class="text-sm text-primary font-medium hover:text-primaryDark">View all</button>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gym Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="openTenantDetail()">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Iron Will Fitness</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">John Doe</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">Pro</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Today, 10:42 AM</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="openTenantDetail()">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Elevate Studio</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Sarah Smith</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">Enterprise</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Yesterday</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-tenants" class="view-section">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">Tenants (Gyms)</h1>
+                        <p class="text-sm text-gray-500 mt-1">Manage all gym clients registered on your platform.</p>
+                    </div>
+                    <button class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-md shadow-sm font-medium text-sm transition flex items-center gap-2">
+                        <i class="ph ph-plus"></i> Add New Gym
+                    </button>
+                </div>
+
+                <div class="flex gap-4 mb-4">
+                    <input type="text" placeholder="Search by name, email..." class="border border-gray-300 rounded-md px-3 py-2 text-sm w-64 shadow-sm focus:border-primary outline-none">
+                    <select class="border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:border-primary outline-none">
+                        <option value="">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="suspended">Suspended</option>
+                        <option value="blocked">Blocked</option>
+                    </select>
+                    <select class="border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:border-primary outline-none">
+                        <option value="">All Plans</option>
+                        <option value="basic">Basic</option>
+                        <option value="pro">Pro</option>
+                        <option value="enterprise">Enterprise</option>
+                    </select>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gym Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="openTenantDetail()">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Iron Will Fitness</div>
+                                    <div class="text-xs text-gray-500">NY, USA</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">John Doe<br><span class="text-xs">john@ironwill.com</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">Pro</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Active</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Oct 12, 2026</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button class="text-primary hover:text-primaryDark">View</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Core Gym</div>
+                                    <div class="text-xs text-gray-500">London, UK</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mark Z.<br><span class="text-xs">mark@coregym.uk</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">Basic</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">Blocked</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mar 01, 2026</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button class="text-primary hover:text-primaryDark">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="skeleton h-4 w-32 mb-1"></div><div class="skeleton h-3 w-20"></div></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="skeleton h-4 w-24 mb-1"></div><div class="skeleton h-3 w-32"></div></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="skeleton h-6 w-16 rounded-full"></div></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="skeleton h-6 w-16 rounded-full"></div></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="skeleton h-4 w-24"></div></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right"><div class="skeleton h-4 w-10 ml-auto"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="px-6 py-3 flex items-center justify-between border-t border-gray-200">
+                        <div class="text-sm text-gray-500">Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">1,482</span> results</div>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1 border border-gray-300 rounded bg-white text-sm text-gray-500 cursor-not-allowed" disabled>Previous</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded bg-white text-sm text-gray-700 hover:bg-gray-50">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-tenant-detail" class="view-section">
+                <button onclick="nav('tenants')" class="text-sm text-gray-500 hover:text-gray-900 mb-4 flex items-center gap-1 font-medium transition">
+                    <i class="ph ph-arrow-left"></i> Back to Tenants
+                </button>
+                
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-2xl font-semibold text-gray-900">Iron Will Fitness</h1>
+                            <span class="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide">Active</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Tenant ID: ten_9X2B1aL</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md shadow-sm font-medium text-sm transition">Change Plan</button>
+                        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md shadow-sm font-medium text-sm transition" onclick="showToast('Gym blocked successfully!', 'error')">Block Gym</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">Gym Information</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Owner</span> <span class="font-medium text-gray-900">John Doe</span></div>
+                            <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Email</span> <span class="font-medium text-gray-900">john@ironwill.com</span></div>
+                            <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Phone</span> <span class="font-medium text-gray-900">+1 555-0198</span></div>
+                            <div class="flex justify-between pb-1"><span class="text-gray-500">Joined</span> <span class="font-medium text-gray-900">Jan 12, 2025</span></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">Subscription</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Current Plan</span> <span class="font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Pro ($99/mo)</span></div>
+                            <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Cycle</span> <span class="font-medium text-gray-900">Monthly</span></div>
+                            <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Next Billing</span> <span class="font-medium text-gray-900">May 12, 2026</span></div>
+                            <div class="flex justify-between pb-1"><span class="text-gray-500">Auto-Renew</span> <span class="font-medium text-green-600">Enabled</span></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">Platform Usage</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Admins</span> <span class="font-medium text-gray-900">2 / 5</span></div>
+                            <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Trainers</span> <span class="font-medium text-gray-900">8 / 20</span></div>
+                            <div class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Active Members</span> <span class="font-medium text-gray-900">450 / Unl.</span></div>
+                            <div class="flex justify-between pb-1"><span class="text-gray-500">Storage Used</span> <span class="font-medium text-gray-900">12GB / 50GB</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment History</h3>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">INV-8821-4A</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$99.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Paid</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 12, 2026</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"><a href="#" class="text-primary hover:text-primaryDark"><i class="ph ph-download-simple text-lg"></i></a></td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">INV-8821-3A</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$99.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Paid</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mar 12, 2026</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"><a href="#" class="text-primary hover:text-primaryDark"><i class="ph ph-download-simple text-lg"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-plans" class="view-section">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">SaaS Plans</h1>
+                        <p class="text-sm text-gray-500 mt-1">Configure pricing tiers and features for gym owners.</p>
+                    </div>
+                    <button onclick="toggleModal('planModal')" class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-md shadow-sm font-medium text-sm transition">
+                        Create Plan
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col">
+                        <div class="p-6 border-b border-gray-100">
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">Basic</h3>
+                            <p class="text-sm text-gray-500 mb-4">For small boutique studios.</p>
+                            <div class="text-3xl font-bold text-gray-900 mb-1">$29<span class="text-base text-gray-500 font-normal">/mo</span></div>
+                        </div>
+                        <div class="p-6 flex-1 text-sm text-gray-600 space-y-3">
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Up to 100 Members</p>
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> 1 Admin Account</p>
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Basic Analytics</p>
+                            <p class="flex items-center gap-2 opacity-50"><i class="ph-fill ph-x-circle text-gray-400"></i> No Custom Branding</p>
+                        </div>
+                        <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-between">
+                            <button class="text-sm font-medium text-gray-700 hover:text-gray-900">Edit</button>
+                            <button class="text-sm font-medium text-red-600 hover:text-red-700">Delete</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-md border-2 border-primary flex flex-col relative">
+                        <div class="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">POPULAR</div>
+                        <div class="p-6 border-b border-gray-100">
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">Pro</h3>
+                            <p class="text-sm text-gray-500 mb-4">For growing gym businesses.</p>
+                            <div class="text-3xl font-bold text-gray-900 mb-1">$99<span class="text-base text-gray-500 font-normal">/mo</span></div>
+                        </div>
+                        <div class="p-6 flex-1 text-sm text-gray-600 space-y-3">
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Unlimited Members</p>
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> 5 Admin Accounts</p>
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Advanced Analytics</p>
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Custom Branding</p>
+                        </div>
+                        <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-between">
+                            <button class="text-sm font-medium text-gray-700 hover:text-gray-900">Edit</button>
+                            <button class="text-sm font-medium text-red-600 hover:text-red-700">Delete</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col">
+                        <div class="p-6 border-b border-gray-100">
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">Enterprise</h3>
+                            <p class="text-sm text-gray-500 mb-4">For franchises & chains.</p>
+                            <div class="text-3xl font-bold text-gray-900 mb-1">$299<span class="text-base text-gray-500 font-normal">/mo</span></div>
+                        </div>
+                        <div class="p-6 flex-1 text-sm text-gray-600 space-y-3">
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Multi-location Support</p>
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Unlimited Staff</p>
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Dedicated Account Mgr</p>
+                            <p class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-500"></i> Custom API Access</p>
+                        </div>
+                        <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-between">
+                            <button class="text-sm font-medium text-gray-700 hover:text-gray-900">Edit</button>
+                            <button class="text-sm font-medium text-red-600 hover:text-red-700">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-subscriptions" class="view-section">
+                <h1 class="text-2xl font-semibold text-gray-900 mb-6">Subscriptions</h1>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="ph ph-magnifying-glass text-3xl text-gray-400"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">No subscriptions found</h3>
+                    <p class="text-sm text-gray-500 mt-2 max-w-sm">There are currently no active subscriptions matching your selected filters.</p>
+                    <button onclick="nav('dashboard')" class="mt-6 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md shadow-sm font-medium text-sm transition">Clear Filters</button>
+                </div>
+            </div>
+
+            <div id="view-payments" class="view-section">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">Payments & Invoices</h1>
+                    </div>
+                    <button class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md shadow-sm font-medium text-sm transition flex items-center gap-2">
+                        <i class="ph ph-export"></i> Export CSV
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Gym</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Iron Will Fitness</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$99.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Paid</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Today</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Core Gym</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$29.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">Failed</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Yesterday</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-analytics" class="view-section">
+                <h1 class="text-2xl font-semibold text-gray-900 mb-6">Detailed Analytics</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 h-80 flex flex-col justify-center items-center">
+                        <i class="ph ph-chart-bar text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500 font-medium">Conversion Rate Chart Placeholder</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 h-80 flex flex-col justify-center items-center">
+                        <i class="ph ph-chart-line-up text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500 font-medium">Churn Rate Chart Placeholder</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-settings" class="view-section">
+                <h1 class="text-2xl font-semibold text-gray-900 mb-6">Platform Settings</h1>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-3xl">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">Global Features</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-gray-900 text-sm">Allow Self-Registration</p>
+                                <p class="text-xs text-gray-500">Gym owners can sign up without admin approval.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" value="" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-gray-900 text-sm">Maintenance Mode</p>
+                                <p class="text-xs text-gray-500">Disable platform access for all tenants (shows maintenance page).</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" value="" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end">
+                        <button class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-md shadow-sm font-medium text-sm transition" onclick="showToast('Settings Saved', 'success')">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="planModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-50 flex items-center justify-center transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-semibold text-gray-900">Create New SaaS Plan</h3>
+                <button onclick="toggleModal('planModal')" class="text-gray-400 hover:text-gray-600"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Plan Name</label>
+                    <input type="text" placeholder="e.g. Starter" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-primary outline-none focus:ring-1 focus:ring-primary transition shadow-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Price (USD)</label>
+                        <input type="number" placeholder="0.00" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-primary outline-none focus:ring-1 focus:ring-primary transition shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Billing Cycle</label>
+                        <select class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-primary outline-none shadow-sm">
+                            <option>Monthly</option>
+                            <option>Yearly</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Members Allowed</label>
+                    <input type="number" placeholder="Leave empty for unlimited" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-primary outline-none shadow-sm">
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
+                <button onclick="toggleModal('planModal')" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md shadow-sm font-medium text-sm transition">Cancel</button>
+                <button onclick="toggleModal('planModal'); showToast('Plan created successfully!', 'success')" class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-md shadow-sm font-medium text-sm transition">Save Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // --- Navigation Logic ---
+        function nav(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            // Show target view
+            document.getElementById('view-' + viewId).classList.add('active');
+            
+            // Update Sidebar UI
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('active', 'bg-blue-50', 'text-primary');
+                el.classList.add('text-gray-600');
+            });
+            const activeLink = document.querySelector(`.nav-link[data-target="${viewId}"]`);
+            if(activeLink) {
+                activeLink.classList.remove('text-gray-600');
+                activeLink.classList.add('active', 'bg-blue-50', 'text-primary');
+            }
+        }
+
+        function openTenantDetail() {
+            nav('tenant-detail');
+        }
+
+        // --- Modal Logic ---
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.toggle('hidden');
+        }
+
+        // --- Toast Logic ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const isSuccess = type === 'success';
+            
+            toast.className = `transform transition-all duration-300 translate-y-10 opacity-0 bg-white border-l-4 ${isSuccess ? 'border-green-500' : 'border-red-500'} shadow-lg rounded-md p-4 flex items-center gap-3 w-72`;
+            toast.innerHTML = `
+                <i class="ph-fill ${isSuccess ? 'ph-check-circle text-green-500' : 'ph-x-circle text-red-500'} text-xl"></i>
+                <span class="text-sm font-medium text-gray-800">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            }, 10);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Charts Initialization ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup Revenue Chart (Line)
+            const ctxRev = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctxRev, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'MRR ($)',
+                        data: [95000, 102000, 115000, 125000, 138000, 142000],
+                        borderColor: '#2563EB',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#2563EB'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: false, grid: { borderDash: [2, 4], color: '#e2e8f0' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Setup Subscription Plan Chart (Doughnut)
+            const ctxSub = document.getElementById('subChart').getContext('2d');
+            new Chart(ctxSub, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Basic', 'Pro', 'Enterprise'],
+                    datasets: [{
+                        data: [450, 800, 140],
+                        backgroundColor: ['#94a3b8', '#2563EB', '#7c3aed'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
