@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitMash — Member App</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent: #E2FF5D;
+    --accent-dim: rgba(226,255,93,0.12);
+    --accent-text: #9ccc30;
+    --bg-base: #0a0a0a;
+    --bg-card: #181818;
+    --bg-card2: #141414;
+    --bg-card3: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #888888;
+    --text-muted: #444444;
+    --border: rgba(255,255,255,0.07);
+    --border-light: rgba(255,255,255,0.04);
+    --warning: #ffaa33;
+    --warning-bg: #2a1a00;
+    --warning-border: #5c3800;
+    --danger: #ff4d4d;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --radius-pill: 999px;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: #0d0d0d;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+    color: var(--text-primary);
+  }
+
+  .app-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .app-header h1 {
+    font-family: var(--font-display);
+    font-size: 52px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .app-header p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .screens-row {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .screen-label {
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* PHONE FRAME */
+  .phone {
+    width: 340px;
+    background: #111;
+    border-radius: 52px;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.04);
+    flex-shrink: 0;
+  }
+  .phone-inner {
+    width: 100%;
+    height: 720px;
+    background: var(--bg-base);
+    border-radius: 44px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .notch-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 22px 6px;
+    flex-shrink: 0;
+  }
+  .notch-time { font-size: 13px; font-weight: 700; color: #fff; }
+  .notch-icons { display: flex; gap: 5px; align-items: center; }
+  .notch-icons span { font-size: 11px; color: #fff; }
+
+  .screen-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px 18px;
+    scrollbar-width: none;
+  }
+  .screen-content::-webkit-scrollbar { display: none; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 10px 18px;
+    background: rgba(14,14,14,0.98);
+    border-top: 0.5px solid var(--border);
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: #444;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    transition: color 0.2s;
+    cursor: pointer;
+    min-width: 52px;
+  }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 20px; height: 20px; }
+
+  /* SHARED COMPONENTS */
+  .section-title {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 0.5px solid var(--border);
+  }
+  .card-dark {
+    background: var(--bg-card2);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border: 0.5px solid var(--border-light);
+  }
+  .tag {
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.3px;
+    display: inline-block;
+  }
+  .badge {
+    background: var(--accent);
+    color: #000;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.3px;
+  }
+  .badge-warn {
+    background: var(--warning);
+    color: #000;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+  }
+  .progress-track {
+    height: 5px;
+    background: rgba(255,255,255,0.06);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: var(--radius-pill);
+  }
+  .check-box {
+    width: 24px; height: 24px;
+    border-radius: 7px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+  .check-box.done { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 800; }
+  .day-pill {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 7px 13px;
+    display: flex; flex-direction: column; align-items: center;
+    font-size: 9px; color: var(--text-secondary);
+    flex-shrink: 0; cursor: pointer;
+  }
+  .day-pill .dp-label { font-size: 8px; font-weight: 700; letter-spacing: 0.5px; }
+  .day-pill .dp-num { font-size: 13px; font-weight: 800; margin-top: 1px; }
+  .day-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
+  .day-pills-row { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; margin-bottom: 16px; }
+  .day-pills-row::-webkit-scrollbar { display: none; }
+  .avatar {
+    width: 56px; height: 56px;
+    border-radius: 18px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: #000;
+    flex-shrink: 0;
+    letter-spacing: 1px;
+  }
+  .cta-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: var(--font-body);
+    padding: 14px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+  }
+  .cta-btn-ghost {
+    width: 100%;
+    background: var(--bg-card);
+    color: var(--danger);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--font-body);
+    padding: 13px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 0.5px solid rgba(255,77,77,0.2);
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  /* ─── SCREEN 1: HOME ─── */
+  .home-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .home-hero-text .date { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+  .home-hero-text .greeting { font-family: var(--font-display); font-size: 32px; color: #fff; line-height: 1.05; letter-spacing: 1px; }
+  .home-hero-text .greeting span { color: var(--accent); }
+  .home-hero-text .trainer { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+  .progress-card {
+    background: linear-gradient(135deg, #182b08, #1f3a0c);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 0.5px solid rgba(162,210,60,0.15);
+  }
+  .progress-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .progress-card-label { font-size: 12px; color: #9ccc30; font-weight: 600; }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stat-tile {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 14px 12px;
+    border: 0.5px solid var(--border);
+    text-align: center;
+  }
+  .stat-tile .val { font-family: var(--font-display); font-size: 28px; color: var(--accent); letter-spacing: 1px; line-height: 1; }
+  .stat-tile .val.white { color: #fff; }
+  .stat-tile .lbl { font-size: 10px; color: var(--text-secondary); margin-top: 5px; font-weight: 500; }
+
+  .today-workout-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 0.5px solid var(--border);
+  }
+  .today-workout-card .row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .today-workout-card .inner {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg-card2); border-radius: var(--radius-sm); padding: 10px 12px;
+  }
+  .workout-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--accent); display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+
+  .week-card { background: var(--bg-card); border-radius: var(--radius-md); padding: 14px; border: 0.5px solid var(--border); }
+  .week-bars { display: flex; gap: 6px; margin-top: 10px; }
+  .week-bar-wrap { flex: 1; text-align: center; }
+  .week-bar { height: 34px; border-radius: 6px; margin-bottom: 5px; }
+  .week-bar.done { background: var(--accent); }
+  .week-bar.rest { background: rgba(255,255,255,0.05); }
+  .week-bar.today { background: var(--accent-dim); border: 1px solid var(--accent); }
+  .week-day-label { font-size: 9px; color: var(--text-muted); font-weight: 600; }
+  .week-day-label.done { color: var(--accent); }
+
+  /* ─── SCREEN 2: WORKOUT ─── */
+  .workout-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .workout-title { font-family: var(--font-display); font-size: 26px; color: #fff; letter-spacing: 1px; }
+  .workout-subtitle { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+  .exercise-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 13px 14px;
+    margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    border: 0.5px solid var(--border);
+    gap: 10px;
+  }
+  .ex-name { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .ex-meta { font-size: 10px; color: var(--text-secondary); }
+  .muscle-chip {
+    background: var(--accent-dim); color: var(--accent);
+    font-size: 9px; font-weight: 700;
+    padding: 2px 7px; border-radius: var(--radius-pill);
+    margin-left: 6px;
+  }
+  .session-progress { background: var(--bg-card); border-radius: var(--radius-md); padding: 14px; margin-top: 4px; border: 0.5px solid var(--border); }
+
+  /* ─── SCREEN 3: DIET ─── */
+  .diet-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .diet-title { font-family: var(--font-display); font-size: 26px; color: #fff; letter-spacing: 1px; }
+  .macro-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .macro-tile {
+    flex: 1; background: var(--bg-card); border-radius: var(--radius-sm);
+    padding: 9px 6px; text-align: center; border: 0.5px solid var(--border);
+  }
+  .macro-val { font-size: 14px; font-weight: 800; color: var(--accent); }
+  .macro-val.white { color: #fff; }
+  .macro-lbl { font-size: 9px; color: var(--text-secondary); margin-top: 2px; }
+  .diet-item {
+    background: var(--bg-card2);
+    border-radius: var(--radius-md);
+    padding: 11px 13px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 11px;
+    border: 0.5px solid var(--border-light);
+  }
+  .diet-item-icon { font-size: 18px; flex-shrink: 0; }
+  .diet-item-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .diet-item-note { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+  .hydration-card { background: var(--bg-card); border-radius: var(--radius-md); padding: 14px; border: 0.5px solid var(--border); margin-bottom: 10px; }
+
+  /* ─── SCREEN 4: PROFILE ─── */
+  .profile-top { text-align: center; padding: 8px 0 18px; }
+  .profile-avatar-wrap { position: relative; display: inline-block; margin-bottom: 12px; }
+  .profile-avatar {
+    width: 76px; height: 76px; border-radius: 24px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 26px; color: #000; letter-spacing: 1px;
+  }
+  .profile-active-dot {
+    width: 14px; height: 14px; background: #4cff88; border-radius: 50%;
+    border: 2px solid var(--bg-base);
+    position: absolute; bottom: 4px; right: 4px;
+  }
+  .profile-name { font-size: 18px; font-weight: 700; color: #fff; }
+  .profile-id { font-size: 10px; color: var(--text-secondary); margin-top: 3px; }
+  .profile-tags { display: flex; justify-content: center; gap: 7px; margin-top: 10px; }
+  .warn-banner {
+    background: var(--warning-bg);
+    border: 0.5px solid var(--warning-border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .warn-banner-icon { font-size: 20px; flex-shrink: 0; }
+  .warn-title { font-size: 12px; font-weight: 700; color: var(--warning); }
+  .warn-sub { font-size: 10px; color: #aa7700; margin-top: 2px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .info-cell .lbl { font-size: 10px; color: var(--text-secondary); }
+  .info-cell .val { font-size: 12px; color: #fff; font-weight: 600; margin-top: 2px; }
+  .stat-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .body-stat { background: var(--bg-card2); border-radius: 10px; padding: 9px 6px; text-align: center; }
+  .body-stat .bval { font-family: var(--font-display); font-size: 18px; color: var(--accent); }
+  .body-stat .blbl { font-size: 9px; color: var(--text-secondary); margin-top: 2px; }
+  .contact-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border-light); }
+  .contact-row:last-child { border-bottom: none; }
+  .contact-icon { font-size: 15px; flex-shrink: 0; width: 26px; text-align: center; }
+  .contact-lbl { font-size: 10px; color: var(--text-secondary); }
+  .contact-val { font-size: 12px; color: #fff; margin-top: 1px; font-weight: 500; }
+
+  /* FOOTER */
+  .footer { margin-top: 50px; text-align: center; }
+  .footer p { font-size: 11px; color: #333; letter-spacing: 1.5px; text-transform: uppercase; }
+  .footer .logo { font-family: var(--font-display); font-size: 22px; color: #222; letter-spacing: 3px; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>FITMASH</h1>
+  <p>Member App — UI Preview</p>
+</div>
+
+<div class="screens-row">
+
+  <!-- ════════════════════════ SCREEN 1: HOME ════════════════════════ -->
+  <div>
+    <div class="screen-label">Home</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="notch-bar">
+          <span class="notch-time">9:41</span>
+          <div class="notch-icons">
+            <span>▲▲▲</span>
+            <span>WiFi</span>
+            <span>🔋</span>
+          </div>
+        </div>
+        <div class="screen-content">
+
+          <div class="home-hero">
+            <div class="home-hero-text">
+              <div class="date">Wednesday, Apr 8</div>
+              <div class="greeting">Hello,<br><span>Abbas</span> 👋</div>
+              <div class="trainer">Trainer: Sobi &nbsp;•&nbsp; Premium Plan</div>
+            </div>
+            <div class="avatar">AK</div>
+          </div>
+
+          <div class="progress-card">
+            <div class="progress-card-header">
+              <span class="progress-card-label">Overall Progress</span>
+              <span class="badge">Day 110 / 120</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:91%"></div></div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px;">
+              <span style="font-size:11px;color:#9ccc30;font-weight:600;">91% completed</span>
+              <span style="font-size:11px;color:#666;">10 days remaining</span>
+            </div>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat-tile"><div class="val">110</div><div class="lbl">Days Active</div></div>
+            <div class="stat-tile"><div class="val">91%</div><div class="lbl">Completion</div></div>
+            <div class="stat-tile"><div class="val white">2,840</div><div class="lbl">kcal Burned</div></div>
+            <div class="stat-tile"><div class="val white">18</div><div class="lbl">Workouts Done</div></div>
+          </div>
+
+          <div class="today-workout-card">
+            <div class="row-top">
+              <span style="font-size:13px;font-weight:600;color:#fff;">Today's Workout</span>
+              <span class="tag">Legs Day</span>
+            </div>
+            <div class="inner">
+              <div class="workout-icon">🦵</div>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:#fff;">4 exercises &nbsp;•&nbsp; ~45 min</div>
+                <div style="font-size:10px;color:#666;margin-top:2px;">Squats, Lunges, Leg Press…</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="week-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;font-weight:600;color:#fff;">This Week</span>
+              <span style="font-size:10px;color:#666;">4 / 6 done</span>
+            </div>
+            <div class="week-bars">
+              <div class="week-bar-wrap"><div class="week-bar done"></div><div class="week-day-label done">M</div></div>
+              <div class="week-bar-wrap"><div class="week-bar done"></div><div class="week-day-label done">T</div></div>
+              <div class="week-bar-wrap"><div class="week-bar done"></div><div class="week-day-label done">W</div></div>
+              <div class="week-bar-wrap"><div class="week-bar done"></div><div class="week-day-label done">T</div></div>
+              <div class="week-bar-wrap"><div class="week-bar today"></div><div class="week-day-label" style="color:var(--accent)">F</div></div>
+              <div class="week-bar-wrap"><div class="week-bar rest"></div><div class="week-day-label">S</div></div>
+              <div class="week-bar-wrap"><div class="week-bar rest"></div><div class="week-day-label">S</div></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <span style="font-size:13px;font-weight:600;color:#fff;">Recent Activity</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                <span style="color:#888;">Chest Day — Tue</span>
+                <span class="tag">Done</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                <span style="color:#888;">Back Day — Mon</span>
+                <span class="tag">Done</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                <span style="color:#888;">Rest Day — Sun</span>
+                <span style="background:rgba(255,255,255,0.05);color:#555;font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;">Rest</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn active">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Home
+          </div>
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M6 12h12"/><circle cx="6" cy="4" r="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="4" r="2"/><circle cx="18" cy="20" r="2"/></svg>
+            Workout
+          </div>
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.5-.8 2.8-2 3.5V12h2l1 4H7l1-4h2V9.5C8.8 8.8 8 7.5 8 6a4 4 0 014-4z"/><path d="M9 20h6"/></svg>
+            Diet
+          </div>
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ SCREEN 2: WORKOUT ════════════════════════ -->
+  <div>
+    <div class="screen-label">Workout</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="notch-bar">
+          <span class="notch-time">9:41</span>
+          <div class="notch-icons"><span>▲▲▲</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+        <div class="screen-content">
+
+          <div class="section-title">Select Day</div>
+          <div class="day-pills-row">
+            <div class="day-pill"><span class="dp-label">DAY</span><span class="dp-num">111</span></div>
+            <div class="day-pill"><span class="dp-label">DAY</span><span class="dp-num">112</span></div>
+            <div class="day-pill active"><span class="dp-label">DAY</span><span class="dp-num">113</span></div>
+            <div class="day-pill"><span class="dp-label">DAY</span><span class="dp-num">114</span></div>
+            <div class="day-pill"><span class="dp-label">DAY</span><span class="dp-num">115</span></div>
+          </div>
+
+          <div class="workout-header">
+            <div>
+              <div class="workout-title">Legs Day 🦵</div>
+              <div class="workout-subtitle">Trainer: Sobi &nbsp;•&nbsp; 4 exercises</div>
+            </div>
+            <span class="badge">Day 113</span>
+          </div>
+
+          <div class="exercise-card">
+            <div style="flex:1;">
+              <div class="ex-name">Squats <span class="muscle-chip">Quads</span></div>
+              <div class="ex-meta">4 × 12 &nbsp;•&nbsp; Barbell</div>
+            </div>
+            <div class="check-box done">✓</div>
+          </div>
+
+          <div class="exercise-card">
+            <div style="flex:1;">
+              <div class="ex-name">15 × 3 Pushups <span class="muscle-chip">Chest</span></div>
+              <div class="ex-meta">3 × 15 &nbsp;•&nbsp; Use Dumbbells</div>
+            </div>
+            <div class="check-box done">✓</div>
+          </div>
+
+          <div class="exercise-card">
+            <div style="flex:1;">
+              <div class="ex-name">15 × 3 Situps <span class="muscle-chip">Core</span></div>
+              <div class="ex-meta">3 × 15 &nbsp;•&nbsp; Use Nothing</div>
+            </div>
+            <div class="check-box"></div>
+          </div>
+
+          <div class="exercise-card">
+            <div style="flex:1;">
+              <div class="ex-name">Leg Press <span class="muscle-chip">Hamstrings</span></div>
+              <div class="ex-meta">3 × 10 &nbsp;•&nbsp; Machine</div>
+            </div>
+            <div class="check-box"></div>
+          </div>
+
+          <div class="exercise-card">
+            <div style="flex:1;">
+              <div class="ex-name">Calf Raises <span class="muscle-chip">Calves</span></div>
+              <div class="ex-meta">4 × 20 &nbsp;•&nbsp; Bodyweight</div>
+            </div>
+            <div class="check-box"></div>
+          </div>
+
+          <div class="session-progress">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:12px;color:#888;">Session Progress</span>
+              <span style="font-size:12px;color:var(--accent);font-weight:700;">2 / 5 done</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:40%"></div></div>
+          </div>
+
+          <button class="cta-btn">▶ &nbsp; Start Workout</button>
+
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Home
+          </div>
+          <div class="nav-btn active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M6 12h12"/><circle cx="6" cy="4" r="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="4" r="2"/><circle cx="18" cy="20" r="2"/></svg>
+            Workout
+          </div>
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.5-.8 2.8-2 3.5V12h2l1 4H7l1-4h2V9.5C8.8 8.8 8 7.5 8 6a4 4 0 014-4z"/><path d="M9 20h6"/></svg>
+            Diet
+          </div>
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ SCREEN 3: DIET ════════════════════════ -->
+  <div>
+    <div class="screen-label">Diet</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="notch-bar">
+          <span class="notch-time">9:41</span>
+          <div class="notch-icons"><span>▲▲▲</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+        <div class="screen-content">
+
+          <div class="section-title">Select Day</div>
+          <div class="day-pills-row">
+            <div class="day-pill"><span class="dp-label">DAY</span><span class="dp-num">111</span></div>
+            <div class="day-pill"><span class="dp-label">DAY</span><span class="dp-num">112</span></div>
+            <div class="day-pill active"><span class="dp-label">DAY</span><span class="dp-num">113</span></div>
+            <div class="day-pill"><span class="dp-label">DAY</span><span class="dp-num">114</span></div>
+            <div class="day-pill"><span class="dp-label">DAY</span><span class="dp-num">115</span></div>
+          </div>
+
+          <div class="diet-header">
+            <div>
+              <div class="diet-title">Today's Diet 🥗</div>
+              <div style="font-size:11px;color:var(--text-secondary);margin-top:3px;">Trainer: Sobi &nbsp;•&nbsp; 1,850 kcal target</div>
+            </div>
+            <span class="tag">Day 113</span>
+          </div>
+
+          <div class="macro-row" style="margin-top:12px;">
+            <div class="macro-tile"><div class="macro-val">186g</div><div class="macro-lbl">Protein</div></div>
+            <div class="macro-tile"><div class="macro-val white">220g</div><div class="macro-lbl">Carbs</div></div>
+            <div class="macro-tile"><div class="macro-val white">52g</div><div class="macro-lbl">Fats</div></div>
+            <div class="macro-tile"><div class="macro-val" style="font-size:12px;color:#9ccc30;">1,840</div><div class="macro-lbl">kcal</div></div>
+          </div>
+
+          <div class="section-title">Morning</div>
+
+          <div class="diet-item">
+            <div class="diet-item-icon">🥚</div>
+            <div style="flex:1;">
+              <div class="diet-item-name">Eat 3 Eggs</div>
+              <div class="diet-item-note">Boiled or scrambled &nbsp;•&nbsp; 18g protein</div>
+            </div>
+            <div class="check-box done">✓</div>
+          </div>
+
+          <div class="diet-item">
+            <div class="diet-item-icon">🥛</div>
+            <div style="flex:1;">
+              <div class="diet-item-name">Eat 1 Pack Milk</div>
+              <div class="diet-item-note">250ml full fat &nbsp;•&nbsp; 8g protein</div>
+            </div>
+            <div class="check-box done">✓</div>
+          </div>
+
+          <div class="diet-item">
+            <div class="diet-item-icon">🍌</div>
+            <div style="flex:1;">
+              <div class="diet-item-name">1 Banana</div>
+              <div class="diet-item-note">Pre-workout energy &nbsp;•&nbsp; 27g carbs</div>
+            </div>
+            <div class="check-box"></div>
+          </div>
+
+          <div class="section-title" style="margin-top:12px;">Lunch</div>
+
+          <div class="diet-item">
+            <div class="diet-item-icon">🍚</div>
+            <div style="flex:1;">
+              <div class="diet-item-name">Rice 150g + Dal</div>
+              <div class="diet-item-note">High-carb recovery &nbsp;•&nbsp; 55g carbs</div>
+            </div>
+            <div class="check-box"></div>
+          </div>
+
+          <div class="diet-item">
+            <div class="diet-item-icon">🍗</div>
+            <div style="flex:1;">
+              <div class="diet-item-name">Grilled Chicken 200g</div>
+              <div class="diet-item-note">Lean protein &nbsp;•&nbsp; 46g protein</div>
+            </div>
+            <div class="check-box"></div>
+          </div>
+
+          <div class="section-title" style="margin-top:12px;">Dinner</div>
+
+          <div class="diet-item">
+            <div class="diet-item-icon">🥗</div>
+            <div style="flex:1;">
+              <div class="diet-item-name">Veg Salad + 2 Eggs</div>
+              <div class="diet-item-note">Light dinner &nbsp;•&nbsp; 24g protein</div>
+            </div>
+            <div class="check-box"></div>
+          </div>
+
+          <div class="hydration-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;font-weight:600;color:#fff;">💧 Water Intake</span>
+              <span style="font-size:13px;color:var(--accent);font-weight:700;">1.8 / 3 L</span>
+            </div>
+            <div class="progress-track" style="margin-top:10px;"><div class="progress-fill" style="width:60%"></div></div>
+            <div style="font-size:10px;color:var(--text-secondary);margin-top:6px;">Drink 3–4 glasses more today</div>
+          </div>
+
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Home
+          </div>
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M6 12h12"/><circle cx="6" cy="4" r="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="4" r="2"/><circle cx="18" cy="20" r="2"/></svg>
+            Workout
+          </div>
+          <div class="nav-btn active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.5-.8 2.8-2 3.5V12h2l1 4H7l1-4h2V9.5C8.8 8.8 8 7.5 8 6a4 4 0 014-4z"/><path d="M9 20h6"/></svg>
+            Diet
+          </div>
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ SCREEN 4: PROFILE ════════════════════════ -->
+  <div>
+    <div class="screen-label">Profile</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="notch-bar">
+          <span class="notch-time">9:41</span>
+          <div class="notch-icons"><span>▲▲▲</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+        <div class="screen-content">
+
+          <div class="profile-top">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar">AK</div>
+              <div class="profile-active-dot"></div>
+            </div>
+            <div class="profile-name">Abbas Kocappuram</div>
+            <div class="profile-id">Member ID: FM-2024-0047</div>
+            <div class="profile-tags">
+              <span class="tag">Active</span>
+              <span class="tag">Premium Plan</span>
+            </div>
+          </div>
+
+          <div class="warn-banner">
+            <div class="warn-banner-icon">⚠️</div>
+            <div>
+              <div class="warn-title">Payment Due Soon</div>
+              <div class="warn-sub">Due in 3 days &nbsp;•&nbsp; ₹2,999 / month</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Membership</div>
+            <div class="info-grid">
+              <div class="info-cell"><div class="lbl">Plan</div><div class="val">Premium 120-Day</div></div>
+              <div class="info-cell"><div class="lbl">Start Date</div><div class="val">Dec 20, 2024</div></div>
+              <div class="info-cell"><div class="lbl">End Date</div><div class="val">Apr 18, 2025</div></div>
+              <div class="info-cell"><div class="lbl">Trainer</div><div class="val">Sobi</div></div>
+              <div class="info-cell"><div class="lbl">Timing</div><div class="val">6:00 AM – 7:30 AM</div></div>
+              <div class="info-cell"><div class="lbl">Batch</div><div class="val">Morning Group B</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Body Stats</div>
+            <div class="stat-grid-3">
+              <div class="body-stat"><div class="bval">72</div><div class="blbl">kg Weight</div></div>
+              <div class="body-stat"><div class="bval">175</div><div class="blbl">cm Height</div></div>
+              <div class="body-stat"><div class="bval">23.5</div><div class="blbl">BMI</div></div>
+              <div class="body-stat"><div class="bval">18%</div><div class="blbl">Body Fat</div></div>
+              <div class="body-stat"><div class="bval" style="font-size:13px;color:#fff;">Muscle</div><div class="blbl">Goal</div></div>
+              <div class="body-stat"><div class="bval" style="font-size:13px;color:#666;">3d ago</div><div class="blbl">Updated</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Contact Info</div>
+            <div class="contact-row">
+              <div class="contact-icon">📱</div>
+              <div><div class="contact-lbl">Phone</div><div class="contact-val">+91 98765 43210</div></div>
+            </div>
+            <div class="contact-row">
+              <div class="contact-icon">✉️</div>
+              <div><div class="contact-lbl">Email</div><div class="contact-val">abbas@email.com</div></div>
+            </div>
+            <div class="contact-row">
+              <div class="contact-icon">📍</div>
+              <div><div class="contact-lbl">Location</div><div class="contact-val">Kocappuram, Kerala</div></div>
+            </div>
+            <div class="contact-row">
+              <div class="contact-icon">🎂</div>
+              <div><div class="contact-lbl">Date of Birth</div><div class="contact-val">14 March 1998</div></div>
+            </div>
+          </div>
+
+          <button class="cta-btn">💳 &nbsp; Renew Membership</button>
+          <button class="cta-btn-ghost">🚪 &nbsp; Log Out</button>
+          <div style="height:12px;"></div>
+
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Home
+          </div>
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M6 12h12"/><circle cx="6" cy="4" r="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="4" r="2"/><circle cx="18" cy="20" r="2"/></svg>
+            Workout
+          </div>
+          <div class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.5-.8 2.8-2 3.5V12h2l1 4H7l1-4h2V9.5C8.8 8.8 8 7.5 8 6a4 4 0 014-4z"/><path d="M9 20h6"/></svg>
+            Diet
+          </div>
+          <div class="nav-btn active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="logo">FITMASH</div>
+  <p>Member App &nbsp;•&nbsp; UI Design Preview</p>
+</div>
+
+</body>
+</html>
