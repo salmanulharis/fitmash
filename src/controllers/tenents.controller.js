@@ -1,6 +1,6 @@
 import prisma from '../config/db.config.js';
 
-export const tenantController = {
+export const tenantsController = {
   // Create tenant
   async create(req, res) {
     try {

@@ -82,5 +82,6 @@ ehthumbs.db
 
 # Prisma
 .prisma/client
+generated
 
 
