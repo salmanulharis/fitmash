@@ -1,0 +1,304 @@
+.saas-plans-page {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.saas-header {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.saas-header h2 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.saas-header p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.content-body.saas-body {
+  padding: 24px;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.plan-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
+}
+
+.plan-card-popular {
+  border-color: #2563eb;
+}
+
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+
+.plan-card-body {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.plan-card-body h3 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.plan-subtitle {
+  margin: 12px 0 0;
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.plan-price {
+  text-align: right;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.plan-price span {
+  font-size: 42px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.plan-price small {
+  color: #4b5563;
+  font-size: 18px;
+}
+
+.plan-divider {
+  margin: 24px 0;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.plan-features {
+  display: grid;
+  gap: 12px;
+  flex: 1;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.feature-item.enabled {
+  color: #111827;
+}
+
+.feature-item.disabled {
+  color: #9ca3af;
+}
+
+.feature-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #e5f3ff;
+  color: #2563eb;
+  font-size: 14px;
+}
+
+.plan-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.plan-actions button {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.plan-action-edit {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #c7d2fe;
+}
+
+.plan-action-edit:hover {
+  background: #dbeafe;
+}
+
+.plan-action-delete {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.plan-action-delete:hover {
+  background: #fee2e2;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 640px;
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 35px 60px rgba(15, 23, 42, 0.12);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.modal-header p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 24px 28px 28px;
+  display: grid;
+  gap: 18px;
+}
+
+.modal-body label {
+  display: block;
+  font-size: 15px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.modal-body input,
+.modal-body textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  font-size: 15px;
+  color: #111827;
+  background: #ffffff;
+}
+
+.modal-body textarea {
+  resize: vertical;
+}
+
+.modal-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.checkbox-label input {
+  width: 18px;
+  height: 18px;
+}
+
+.modal-footer {
+  padding: 0 28px 28px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+
+@media (max-width: 1024px) {
+  .plans-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .content-header.saas-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -5,6 +5,7 @@
   --text-color: #111827;
   --border-color: #e5e7eb;
   --header-height: 100px;
+  --primary-color-hover: #1d4ed8;
 }
 
 body {
@@ -27,4 +28,23 @@ body {
   display: flex;          /* 🔥 add this */
   align-items: center;    /* 🔥 add this */
   padding: 0 24px;        /* optional (match left side) */
+  justify-content: space-between;
+}
+
+.btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-color-hover);
 }
