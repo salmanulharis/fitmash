@@ -30,7 +30,14 @@ const Tenants = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingTenant, setEditingTenant] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [formData, setFormData] = useState({ name: '', ownerId: '', status: 'active', blockedReason: '' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    ownerId: '', 
+    status: 'active', 
+    blockedReason: '',
+    gym: { name: '', address: '', contactNumber: '' },
+    plan: { name: '', type: 'workout', description: '' }
+  });
   
   const itemsPerPage = 10;
 
@@ -53,10 +60,24 @@ const Tenants = () => {
   const openModal = (tenant = null) => {
     if (tenant) {
       setEditingTenant(tenant);
-      setFormData({ name: tenant.name, ownerId: tenant.ownerId, status: tenant.status, blockedReason: tenant.blockedReason || '' });
+      setFormData({ 
+        name: tenant.name, 
+        ownerId: tenant.ownerId, 
+        status: tenant.status, 
+        blockedReason: tenant.blockedReason || '',
+        gym: { name: '', address: '', contactNumber: '' },
+        plan: { name: '', type: 'workout', description: '' }
+      });
     } else {
       setEditingTenant(null);
-      setFormData({ name: '', ownerId: '', status: 'active', blockedReason: '' });
+      setFormData({ 
+        name: '', 
+        ownerId: '', 
+        status: 'active', 
+        blockedReason: '',
+        gym: { name: '', address: '', contactNumber: '' },
+        plan: { name: '', type: 'workout', description: '' }
+      });
     }
     setShowModal(true);
   };
@@ -64,12 +85,29 @@ const Tenants = () => {
   const closeModal = () => {
     setShowModal(false);
     setEditingTenant(null);
-    setFormData({ name: '', ownerId: '', status: 'active', blockedReason: '' });
+    setFormData({ 
+      name: '', 
+      ownerId: '', 
+      status: 'active', 
+      blockedReason: '',
+      gym: { name: '', address: '', contactNumber: '' },
+      plan: { name: '', type: 'workout', description: '' }
+    });
   };
 
   const handleSaveTenant = () => {
     if (!formData.name.trim() || !formData.ownerId.trim()) {
-      alert('Please fill in all required fields');
+      alert('Please fill in all required tenant fields');
+      return;
+    }
+
+    if (!formData.gym.name.trim() || !formData.gym.address.trim() || !formData.gym.contactNumber.trim()) {
+      alert('Please fill in all required gym fields');
+      return;
+    }
+
+    if (!formData.plan.name.trim()) {
+      alert('Please fill in plan name');
       return;
     }
 
@@ -82,9 +120,22 @@ const Tenants = () => {
     } else {
       const newTenant = {
         id: `tenant-${String(tenants.length + 1).padStart(3, '0')}`,
-        ...formData,
+        name: formData.name,
+        ownerId: formData.ownerId,
+        status: formData.status,
+        blockedReason: formData.blockedReason,
         blockedAt: formData.status === 'blocked' ? new Date().toLocaleDateString() : null,
-        createdAt: new Date().toLocaleDateString()
+        createdAt: new Date().toLocaleDateString(),
+        gym: {
+          id: `gym-${String(tenants.length + 1).padStart(3, '0')}`,
+          ...formData.gym,
+          createdAt: new Date().toLocaleDateString()
+        },
+        plan: {
+          id: `plan-${String(tenants.length + 1).padStart(3, '0')}`,
+          ...formData.plan,
+          createdAt: new Date().toLocaleDateString()
+        }
       };
       setTenants([...tenants, newTenant]);
     }
@@ -215,60 +266,153 @@ const Tenants = () => {
       {/* Modal for Add/Edit Tenant */}
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editingTenant ? 'Edit Tenant' : 'Add New Tenant'}</h3>
+              <h3>{editingTenant ? 'Edit Tenant' : 'Add New Tenant with Gym & Plan'}</h3>
               <button className="modal-close" onClick={closeModal}>✕</button>
             </div>
             <div className="modal-body">
-              <div className="form-group">
-                <label>Tenant Name *</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., FitZone Gym"
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label>Owner ID *</label>
-                <input
-                  type="text"
-                  value={formData.ownerId}
-                  onChange={(e) => setFormData({ ...formData, ownerId: e.target.value })}
-                  placeholder="e.g., owner-001"
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label>Status</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="form-input"
-                >
-                  <option value="active">Active</option>
-                  <option value="blocked">Blocked</option>
-                  <option value="suspended">Suspended</option>
-                </select>
-              </div>
-              {formData.status === 'blocked' && (
+              {/* Tenant Information */}
+              <div className="form-section">
+                <h4>Tenant Information</h4>
                 <div className="form-group">
-                  <label>Blocked Reason</label>
+                  <label>Tenant Name *</label>
                   <input
                     type="text"
-                    value={formData.blockedReason}
-                    onChange={(e) => setFormData({ ...formData, blockedReason: e.target.value })}
-                    placeholder="e.g., Payment overdue"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., FitZone Gym"
                     className="form-input"
                   />
                 </div>
-              )}
+                <div className="form-group">
+                  <label>Owner ID *</label>
+                  <input
+                    type="text"
+                    value={formData.ownerId}
+                    onChange={(e) => setFormData({ ...formData, ownerId: e.target.value })}
+                    placeholder="e.g., owner-001"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="form-input"
+                  >
+                    <option value="active">Active</option>
+                    <option value="blocked">Blocked</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+                {formData.status === 'blocked' && (
+                  <div className="form-group">
+                    <label>Blocked Reason</label>
+                    <input
+                      type="text"
+                      value={formData.blockedReason}
+                      onChange={(e) => setFormData({ ...formData, blockedReason: e.target.value })}
+                      placeholder="e.g., Payment overdue"
+                      className="form-input"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Gym Information */}
+              <div className="form-section">
+                <h4>Gym Information</h4>
+                <div className="form-group">
+                  <label>Gym Name *</label>
+                  <input
+                    type="text"
+                    value={formData.gym.name}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      gym: { ...formData.gym, name: e.target.value }
+                    })}
+                    placeholder="e.g., Main Gym"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Address *</label>
+                  <input
+                    type="text"
+                    value={formData.gym.address}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      gym: { ...formData.gym, address: e.target.value }
+                    })}
+                    placeholder="e.g., 123 Main St, City"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Contact Number *</label>
+                  <input
+                    type="text"
+                    value={formData.gym.contactNumber}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      gym: { ...formData.gym, contactNumber: e.target.value }
+                    })}
+                    placeholder="e.g., +1-XXX-XXX-XXXX"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              {/* Plan Information */}
+              <div className="form-section">
+                <h4>Initial Plan</h4>
+                <div className="form-group">
+                  <label>Plan Name *</label>
+                  <input
+                    type="text"
+                    value={formData.plan.name}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      plan: { ...formData.plan, name: e.target.value }
+                    })}
+                    placeholder="e.g., 8-Week Transformation"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Plan Type</label>
+                  <select
+                    value={formData.plan.type}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      plan: { ...formData.plan, type: e.target.value }
+                    })}
+                    className="form-input"
+                  >
+                    <option value="workout">Workout</option>
+                    <option value="diet">Diet</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea
+                    value={formData.plan.description}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      plan: { ...formData.plan, description: e.target.value }
+                    })}
+                    placeholder="Brief description of the plan"
+                    className="form-input"
+                    rows="3"
+                  />
+                </div>
+              </div>
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={closeModal}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSaveTenant}>Save Tenant</button>
+              <button className="btn btn-primary" onClick={handleSaveTenant}>Save Tenant with Gym & Plan</button>
             </div>
           </div>
         </div>

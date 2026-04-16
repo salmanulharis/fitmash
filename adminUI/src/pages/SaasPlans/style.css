@@ -108,9 +108,11 @@
 }
 
 .plan-features {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   flex: 1;
+  overflow: auto;
 }
 
 .feature-item {
@@ -185,17 +187,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 0px;
   z-index: 50;
+  height: 100vh;
 }
 
 .modal-card {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 640px;
   background: white;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 35px 60px rgba(15, 23, 42, 0.12);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  height: 95%;
 }
 
 .modal-header {
@@ -229,6 +238,7 @@
   padding: 24px 28px 28px;
   display: grid;
   gap: 18px;
+  flex: 1;
 }
 
 .modal-body label {
@@ -301,4 +311,104 @@
   .modal-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* Features Section Styles */
+.features-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.features-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.features-header label {
+  margin: 0;
+}
+
+.btn-add-feature {
+  padding: 8px 16px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-feature:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.feature-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.feature-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.feature-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.feature-checkbox input {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-remove-feature {
+  width: 28px;
+  height: 28px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-feature:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
 }

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './style.css';
+import { api } from '../../services/api';
 
 const initialPlans = [
   {
@@ -55,13 +56,20 @@ const SaasPlans = () => {
     description: '',
     price: '',
     durationDays: '30',
-    features: 'Feature 1, Feature 2, Feature 3',
+    features: [{ label: '', enabled: true }],
     popular: false
   });
 
   const openCreateModal = () => {
     setEditingPlan(null);
-    setForm({ name: '', description: '', price: '', durationDays: '30', features: '', popular: false });
+    setForm({ 
+      name: '', 
+      description: '', 
+      price: '', 
+      durationDays: '30', 
+      features: [{ label: '', enabled: true }], 
+      popular: false 
+    });
     setIsModalOpen(true);
   };
 
@@ -72,7 +80,7 @@ const SaasPlans = () => {
       description: plan.description,
       price: plan.price.toString(),
       durationDays: plan.durationDays.toString(),
-      features: plan.features.map((feature) => feature.label).join(', '),
+      features: plan.features.length > 0 ? plan.features : [{ label: '', enabled: true }],
       popular: plan.popular
     });
     setIsModalOpen(true);
@@ -83,49 +91,114 @@ const SaasPlans = () => {
     setEditingPlan(null);
   };
 
-  const handleSavePlan = () => {
+  const addFeature = () => {
+    setForm(prev => ({
+      ...prev,
+      features: [...prev.features, { label: '', enabled: true }]
+    }));
+  };
+
+  const removeFeature = (index) => {
+    setForm(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateFeature = (index, field, value) => {
+    setForm(prev => ({
+      ...prev,
+      features: prev.features.map((feature, i) => 
+        i === index ? { ...feature, [field]: value } : feature
+      )
+    }));
+  };
+
+  const handleSavePlan = async () => {
     if (!form.name.trim() || !form.price.trim() || !form.description.trim()) {
       alert('Please fill in the plan name, price, and description.');
       return;
     }
 
+    // Filter out empty features and validate
+    const validFeatures = form.features.filter(feature => feature.label.trim() !== '');
+    if (validFeatures.length === 0) {
+      alert('Please add at least one feature.');
+      return;
+    }
+
     const parsedPrice = Number(form.price);
     const parsedDuration = Number(form.durationDays);
-    const parsedFeatures = form.features
-      .split(',')
-      .map((feature) => feature.trim())
-      .filter(Boolean)
-      .map((label) => ({ label, enabled: true }));
 
     if (editingPlan) {
-      setPlans((currentPlans) =>
-        currentPlans.map((plan) =>
-          plan.id === editingPlan.id
-            ? { ...plan, name: form.name, description: form.description, price: parsedPrice, durationDays: parsedDuration, features: parsedFeatures, popular: form.popular }
-            : plan
-        )
-      );
-    } else {
-      const newPlan = {
-        id: `plan-${Date.now()}`,
+      const updatedPlan = {
+        ...editingPlan,
         name: form.name,
         description: form.description,
         price: parsedPrice,
         durationDays: parsedDuration,
-        features: parsedFeatures,
+        features: validFeatures,
         popular: form.popular
       };
-      setPlans((currentPlans) => [...currentPlans, newPlan]);
+      const res = await api.updateSaasPlan(editingPlan.id, updatedPlan);
+      if (res.ok) {
+        setPlans((currentPlans) =>
+          currentPlans.map((plan) =>
+            plan.id === editingPlan.id
+              ? { ...plan, name: form.name, description: form.description, price: parsedPrice, durationDays: parsedDuration, features: validFeatures, popular: form.popular }
+              : plan
+          )
+        );
+      }else {
+        alert('Error updating plan.');
+        return;
+      }
+    } else {
+      const newPlan = {
+        name: form.name,
+        description: form.description,
+        price: parsedPrice,
+        durationDays: parsedDuration,
+        features: validFeatures,
+        popular: form.popular
+      };
+      const res = await api.createSaasPlan(newPlan);
+      if (res.ok) {
+        const createdPlan = await res.json();
+        setPlans((currentPlans) => [...currentPlans, createdPlan]);
+      } else {
+        alert('Error creating plan.');
+        return;
+      }
     }
 
     closeModal();
   };
 
-  const handleDelete = (planId) => {
+  const handleDelete = async (planId) => {
     if (window.confirm('Delete this plan? This action cannot be undone.')) {
-      setPlans((currentPlans) => currentPlans.filter((plan) => plan.id !== planId));
+      const res = await api.deleteSaasPlan(planId);
+      if (res.ok) {
+        setPlans((currentPlans) => currentPlans.filter((plan) => plan.id !== planId));
+      } else {
+        alert('Error deleting plan.');
+      }
     }
   };
+
+  const fetchPlans = async () => {
+    const res = await api.getSaasPlans();
+    if (res.ok) {
+      const data = await res.json();
+      setPlans(data);
+    } else {
+      alert('Error fetching plans.');
+    }
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
 
   return (
     <div className="main-content saas-plans-page">
@@ -226,15 +299,44 @@ const SaasPlans = () => {
                 </label>
               </div>
 
-              <label>
-                Features
-                <textarea
-                  rows="4"
-                  value={form.features}
-                  onChange={(e) => setForm({ ...form, features: e.target.value })}
-                  placeholder="Enter comma-separated feature names"
-                />
-              </label>
+              <div className="features-section">
+                <div className="features-header">
+                  <label>Features</label>
+                  <button type="button" className="btn-add-feature" onClick={addFeature}>
+                    + Add Feature
+                  </button>
+                </div>
+                <div className="features-list">
+                  {form.features.map((feature, index) => (
+                    <div key={index} className="feature-row">
+                      <input
+                        type="text"
+                        value={feature.label}
+                        onChange={(e) => updateFeature(index, 'label', e.target.value)}
+                        placeholder="Feature name"
+                        className="feature-input"
+                      />
+                      <label className="feature-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={feature.enabled}
+                          onChange={(e) => updateFeature(index, 'enabled', e.target.checked)}
+                        />
+                        Enabled
+                      </label>
+                      {form.features.length > 1 && (
+                        <button 
+                          type="button" 
+                          className="btn-remove-feature"
+                          onClick={() => removeFeature(index)}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               <label className="checkbox-label">
                 <input
