@@ -175,9 +175,11 @@ model TrainerUser {
 model SaasPlan {
   id            String   @id @default(uuid()) @db.Uuid
   name          String
+  description   String
   price         Decimal  @db.Decimal(10, 2)
   durationDays  Int
   features      Json
+  popular       Boolean  @default(false)
 
   subscriptions TenantSubscription[]
 

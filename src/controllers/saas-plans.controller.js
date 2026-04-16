@@ -9,6 +9,7 @@ export const saasPlanController = {
       });
       res.status(201).json(saasPlan);
     } catch (error) {
+      console.error('Error creating saas plan:', error);
       res.status(400).json({ error: error.message });
     }
   },
